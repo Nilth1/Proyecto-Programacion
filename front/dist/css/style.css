@@ -53,3 +53,21 @@
     filter: blur(90px);
     z-index: -1;    
 }
+
+/* tarjetas de servicio */
+.service-card {
+    background-color: rgba(39, 38, 38, 0.37) !important;
+    backdrop-filter: blur(5px);
+    
+}
+
+.icon-box {
+    background-color: rgba(0, 102, 255, 0.15);
+    color: #0066ff; 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+}

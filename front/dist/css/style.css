@@ -1,0 +1,55 @@
+
+/* hero */
+.hero-section {
+    min-height: 100vh;
+}
+.hero-bg-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+}
+/* degrade oscuro arriba de la hero */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient( rgba(0, 0, 0, 0.2) 0%, rgba(10, 10, 10, 0.9) 100%);
+}
+
+/* titulo de aqui no hay limites */
+.fw-black {
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+/* cuadrado con info */
+.stats-card {
+    background-color: rgba(20, 20, 20, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.nav-link:hover {
+    color: #0066ff;
+}
+.nav-link.active {
+    color: #0066ff;
+}
+
+/* brillito ttitulo hero */
+.hero-glow {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background-color: rgba(0, 102, 255, 0.3);
+    border-radius: 50%;
+    filter: blur(90px);
+    z-index: -1;    
+}

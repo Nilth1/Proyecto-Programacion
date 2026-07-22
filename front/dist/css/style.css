@@ -71,3 +71,41 @@
     height: 38px;
     border-radius: 6px;
 }
+
+.why-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.why-badge {
+    bottom: -20px;
+    right: -20px;
+    background-color: #0066ff;
+    width: 110px;
+}
+
+.icon-box {
+    width: 38px;
+    height: 38px;
+}
+
+.icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.trainer-card {
+    min-height: 320px;
+}
+
+.trainer-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.trainer-overlay {
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 40%, #000000 100%);
+}

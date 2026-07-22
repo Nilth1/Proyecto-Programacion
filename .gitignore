@@ -90,7 +90,7 @@ composer.phar
 # ==========================================
 # 5. COMPILACIÓN / COMPILADORES / BUILD OUT (Dist/Build)
 # ==========================================
-dist/
+
 build/
 out/
 .next/

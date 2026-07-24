@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - FitPower</title>
+
+  <link rel="stylesheet" href="../css/login.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <a href="../../index.html" class="back-link d-inline-flex align-items-center gap-2 text-decoration-none mb-5">
+                <span class="back-arrow">←</span>
+                <span class="text-uppercase small fw-semibold">Volver</span>
+            </a>
+            
+  <div class="tarjeta">
+
+    <h1 class="titulo">
+      <span class="blanco">FIT</span><span class="azul">POWER</span>
+    </h1>
+
+    <form>
+      <div class="renglon">
+        <label for="mail">Email</label>
+        <input id="mail" type="email" placeholder="lucas@gmail.com" required>
+      </div>
+
+      <div class="renglon">
+        <label for="clave">Contraseña</label>
+        <input id="clave" type="password" placeholder="••••••••" required>
+      </div>
+
+      <div class="quienentra">
+        <label class="letrero">Ingresar como</label>
+        <div class="opciones">
+
+          <button type="button" class="opcion elegida" data-quien="socio">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+            </svg>
+            Socio
+          </button>
+
+          <button type="button" class="opcion" data-quien="entrenador">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6.5 6.5l11 11"></path>
+              <path d="M21 3l-4 1 0 4-3-3 3-3 4 1z"></path>
+              <path d="M3 21l4-1 0-4 3 3-3 3-4-1z"></path>
+              <path d="M15 5l4 4"></path>
+              <path d="M5 15l4 4"></path>
+            </svg>
+            Entrenador
+          </button>
+
+          <button type="button" class="opcion" data-quien="administrador">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"></path>
+            </svg>
+            Administrador
+          </button>
+
+        </div>
+      </div>
+
+      <button type="submit" class="botonentrar">Ingresar</button>
+    </form>
+
+    <p class="abajo">v1.0.0 — FITPOWER Gym OS</p>
+
+  </div>
+
+  <script>
+    const opciones = document.querySelectorAll('.opcion');
+    opciones.forEach(op => {
+      op.addEventListener('click', () => {
+        opciones.forEach(o => o.classList.remove('elegida'));
+        op.classList.add('elegida');
+      });
+    });
+  </script>
+
+</body>
+</html>

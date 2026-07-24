@@ -1,0 +1,14 @@
+.trainer-card-2 {
+    background-color: rgba(20, 20, 20, 0.8);
+}
+
+.trainer-img-2 {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+.cta-banner {
+    background-color: rgba(0, 51, 128, 0.25);
+    border: 1px solid rgba(0, 102, 255, 0.2);
+}

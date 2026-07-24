@@ -1,0 +1,92 @@
+.plans-section {
+    min-height: 100vh;
+}
+
+/* boton volver */
+.back-link {
+    color: #a0a0a0;
+    transition: color 0.2s ease;
+}
+
+.back-link:hover {
+    color: #0066ff;
+}
+
+.back-arrow {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+
+.plan-detail-card {
+    background-color: rgba(20, 20, 20, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.plan-detail-featured {
+    background: linear-gradient(160deg, #0066ff 0%, #0047b3 100%);
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 102, 255, 0.25);
+}
+
+.plan-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffffff;
+    color: #0066ff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.plan-eyebrow {
+    color: #0066ff;
+    letter-spacing: 1px;
+}
+
+.plan-detail-featured .plan-eyebrow {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.plan-name {
+    font-size: 2.5rem;
+    letter-spacing: 1px;
+}
+
+.plan-price-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.plan-price {
+    font-size: 3.25rem;
+    line-height: 1;
+}
+
+.plan-check {
+    color: #d0d0d0;
+}
+
+.plan-check-light {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.plan-check .check-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(0, 102, 255, 0.15);
+    color: #0066ff;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.plan-check-light .check-icon {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}

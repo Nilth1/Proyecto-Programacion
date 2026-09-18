@@ -40,77 +40,39 @@
         <div class="opciones">
 
           <button type="button" class="opcion elegida" data-quien="socio">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="8" r="4"></circle>
-              <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
-            </svg>
-            Socio
-          </button>
+            <svg viewBox="0 0 24 24" fill="nonePuedes reemplazar la sección del `<script>` al final de tu `login.html` con este código, utilizando el valor de `rolSeleccionado` para armar dinámicamente el nombre del archivo HTML destino (`socio.html`, `entrenador.html` o `administrador.html`):
 
-          <button type="button" class="opcion" data-quien="entrenador">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6.5 6.5l11 11"></path>
-              <path d="M21 3l-4 1 0 4-3-3 3-3 4 1z"></path>
-              <path d="M3 21l4-1 0-4 3 3-3 3-4-1z"></path>
-              <path d="M15 5l4 4"></path>
-              <path d="M5 15l4 4"></path>
-            </svg>
-            Entrenador
-          </button>
+```javascript
+// Configuración de botones de selección de rol
+const opciones = document.querySelectorAll('.opcion');
+opciones.forEach(op => {
+  op.addEventListener('click', () => {
+    opciones.forEach(o => o.classList.remove('elegida'));
+    op.classList.add('elegida');
+  });
+});
 
-          <button type="button" class="opcion" data-quien="administrador">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"></path>
-            </svg>
-            Administrador
-          </button>
+// Captura del formulario de login
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-        </div>
-      </div>
+  const mail = document.getElementById('mail').value.trim();
+  const clave = document.getElementById('clave').value.trim();
+  const botonRol = document.querySelector('.opcion.elegida');
+  const rolSeleccionado = botonRol ? botonRol.dataset.quien : 'socio';
 
-      <button type="submit" class="botonentrar">Ingresar</button>
-    </form>
+  try {
+    const respuesta = await API.login(mail, clave, rolSeleccionado);
+    console.log("Respuesta de la API:", respuesta);
 
-    <p class="abajo">v1.0.0 — FITPOWER Gym OS</p>
-
-  </div>
-
-  <script src="../js/api.js"></script>
-  <script>
-    // Configuración de botones de selección de rol
-    const opciones = document.querySelectorAll('.opcion');
-    opciones.forEach(op => {
-      op.addEventListener('click', () => {
-        opciones.forEach(o => o.classList.remove('elegida'));
-        op.classList.add('elegida');
-      });
-    });
-
-    // Captura del formulario de login
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const mail = document.getElementById('mail').value.trim();
-      const clave = document.getElementById('clave').value.trim();
-      const botonRol = document.querySelector('.opcion.elegida');
-      const rolSeleccionado = botonRol ? botonRol.dataset.quien : 'socio';
-
-      try {
-        const respuesta = await API.login(mail, clave, rolSeleccionado);
-        console.log("Respuesta de la API:", respuesta);
-
-        if (respuesta.status === 'success') {
-          alert('¡Login correcto! Redirigiendo a prueba...');
-          // Redirección temporal a test.html
-          window.location.href = 'test.html';
-        } else {
-          alert('Error: ' + (respuesta.message || 'Credenciales incorrectas'));
-        }
-      } catch (err) {
-        console.error("Error al conectar:", err);
-        alert('Ocurrió un error de conexión con la API.');
-      }
-    });
-  </script>
-</body>
-</html>
+    if (respuesta.status === 'success') {
+      // Redirecciona según el rol elegido ('socio.html', 'entrenador.html' o 'administrador.html')
+      window.location.href = `${rolSeleccionado}.html`;
+    } else {
+      alert('Error: ' + (respuesta.message || 'Credenciales incorrectas'));
+    }
+  } catch (err) {
+    console.error("Error al conectar:", err);
+    alert('Ocurrió un error de conexión con la API.');
+  }
+});

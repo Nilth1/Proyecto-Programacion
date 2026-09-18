@@ -239,3 +239,11 @@ VALUES
 ('Remera FitPower', 'Remera deportiva oficial', 10),
 ('Toalla Deportiva', 'Toalla deportiva con logo FitPower', 8),
 ('Mochila Deportiva', 'Mochila para entrenamiento', 5);
+
+INSERT INTO user
+(nombre, apellido, cedula, numero_telefono, huella_dactilar, rol, email, contrasena, fecha_registro, estado)
+VALUES
+
+('Admin', 'FitPower', '12345678', '099123456', NULL, 'Administrador', 'admin@fitpower.com', '123456', CURDATE(), 'Activo');
+('Lucas', 'Abestia', '57654321', '099876543', NULL, 'Socio', 'lucas@gmail.com', '1234', CURDATE(), 'Activo');
+('Sofiav', 'Rodriguez', '41223344', '099112233', NULL, 'Entrenador', 'SofiaE@fitpower.com', '1234', CURDATE(), 'Activo');

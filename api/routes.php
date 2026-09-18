@@ -1,9 +1,6 @@
 <?php
 // api/routes.php
-// Acá se anota: "cuando pidan ESTA url, ejecutá ESTE controlador@método"
 
-$router->get('/estado', 'EstadoController@ver');
-
-
-// Próxima clase: login
-// $router->post('/login', 'AuthController@login');
+// Endpoints de la Fase 1
+$router->post('/login', 'AuthController@login');
+$router->post('/logout', 'AuthController@logout');

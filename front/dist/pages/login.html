@@ -14,9 +14,9 @@
 <body>
 
   <a href="../../index.html" class="back-link d-inline-flex align-items-center gap-2 text-decoration-none mb-5">
-                <span class="back-arrow">←</span>
-                <span class="text-uppercase small fw-semibold">Volver</span>
-            </a>
+    <span class="back-arrow">←</span>
+    <span class="text-uppercase small fw-semibold">Volver</span>
+  </a>
             
   <div class="tarjeta">
 
@@ -24,7 +24,7 @@
       <span class="blanco">FIT</span><span class="azul">POWER</span>
     </h1>
 
-    <form>
+    <form id="loginForm">
       <div class="renglon">
         <label for="mail">Email</label>
         <input id="mail" type="email" placeholder="lucas@gmail.com" required>
@@ -75,7 +75,9 @@
 
   </div>
 
+  <script src="../js/api.js"></script>
   <script>
+    // Configuración de botones de selección de rol
     const opciones = document.querySelectorAll('.opcion');
     opciones.forEach(op => {
       op.addEventListener('click', () => {
@@ -83,7 +85,32 @@
         op.classList.add('elegida');
       });
     });
-  </script>
 
+    // Captura del formulario de login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const mail = document.getElementById('mail').value.trim();
+      const clave = document.getElementById('clave').value.trim();
+      const botonRol = document.querySelector('.opcion.elegida');
+      const rolSeleccionado = botonRol ? botonRol.dataset.quien : 'socio';
+
+      try {
+        const respuesta = await API.login(mail, clave, rolSeleccionado);
+        console.log("Respuesta de la API:", respuesta);
+
+        if (respuesta.status === 'success') {
+          alert('¡Login correcto! Redirigiendo a prueba...');
+          // Redirección temporal a test.html
+          window.location.href = 'test.html';
+        } else {
+          alert('Error: ' + (respuesta.message || 'Credenciales incorrectas'));
+        }
+      } catch (err) {
+        console.error("Error al conectar:", err);
+        alert('Ocurrió un error de conexión con la API.');
+      }
+    });
+  </script>
 </body>
 </html>

@@ -1,91 +1,241 @@
 -- ========================================================
--- SCRIPT DE CREACIÓN: SISTEMA DE GESTIÓN DE AUTOMOTORA
+-- SCRIPT DE CREACIÓN: SISTEMA DE GESTIÓN FITPOWER
 -- ========================================================
 
+-- ========================================================
 -- 1. CREACIÓN DE TABLAS (DDL)
+-- ========================================================
 
-CREATE TABLE MARCAS (
-    id_marca INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_marca VARCHAR(50) NOT NULL,
-    pais_origen VARCHAR(50)
+-- --------------------------------------------------------
+-- TABLA: user
+-- --------------------------------------------------------
+
+CREATE TABLE user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(50) NOT NULL,
+    cedula VARCHAR(20) NOT NULL,
+    numero_telefono VARCHAR(20) NULL,
+    huella_dactilar VARCHAR(255) NULL,
+    rol VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    contrasena VARCHAR(255) NOT NULL,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
+
+    UNIQUE (cedula),
+    UNIQUE (email)
 );
 
-CREATE TABLE VEHICULOS (
-    id_vehiculo INT AUTO_INCREMENT PRIMARY KEY,
-    id_marca INT,
-    modelo VARCHAR(50) NOT NULL,
-    anio INT,
-    precio DECIMAL(10, 2),
-    estado VARCHAR(20), -- 'Nuevo' o 'Usado'
-    FOREIGN KEY (id_marca) REFERENCES MARCAS(id_marca)
+
+-- --------------------------------------------------------
+-- TABLA: ejercicios
+-- --------------------------------------------------------
+
+CREATE TABLE ejercicios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    repeticiones INT NOT NULL,
+    series INT NOT NULL,
+    dificultad VARCHAR(50) NOT NULL,
+    grupo_muscular VARCHAR(100) NOT NULL,
+    tipo_ejercicio VARCHAR(50) NOT NULL,
+    info_ejercicio VARCHAR(500) NULL,
+    media_ejercicio VARCHAR(255) NULL,
+    destaca BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE CLIENTES (
-    id_cliente INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_completo VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE,
-    telefono VARCHAR(20) -- Algunos no tendrán teléfono para probar IS NULL
+
+-- --------------------------------------------------------
+-- TABLA: rutinas
+-- --------------------------------------------------------
+
+CREATE TABLE rutinas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT NULL,
+    dificultad ENUM('Principiante', 'Intermedio', 'Avanzado') NOT NULL,
+    grupo_muscular VARCHAR(100) NOT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE EMPLEADOS (
-    id_empleado INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_completo VARCHAR(100) NOT NULL,
-    cargo VARCHAR(50),
-    salario DECIMAL(10, 2)
+
+-- --------------------------------------------------------
+-- TABLA: rutina_ejercicio
+-- Relaciona rutinas con ejercicios
+-- --------------------------------------------------------
+
+CREATE TABLE rutina_ejercicio (
+    id_rutina INT NOT NULL,
+    id_ejercicio INT NOT NULL,
+    repeticiones INT NULL,
+    orden INT NULL,
+    tiempo_descanso INT NULL,
+
+    PRIMARY KEY (id_rutina, id_ejercicio),
+
+    FOREIGN KEY (id_rutina)
+        REFERENCES rutinas(id),
+
+    FOREIGN KEY (id_ejercicio)
+        REFERENCES ejercicios(id)
 );
 
-CREATE TABLE VENTAS (
-    id_venta INT AUTO_INCREMENT PRIMARY KEY,
-    id_vehiculo INT UNIQUE, -- Un vehículo se vende una sola vez en este sistema
-    id_cliente INT,
-    id_empleado INT,
-    fecha_venta DATE,
-    monto_total DECIMAL(10, 2),
-    FOREIGN KEY (id_vehiculo) REFERENCES VEHICULOS(id_vehiculo),
-    FOREIGN KEY (id_cliente) REFERENCES CLIENTES(id_cliente),
-    FOREIGN KEY (id_empleado) REFERENCES EMPLEADOS(id_empleado)
+
+-- --------------------------------------------------------
+-- TABLA: admin
+-- --------------------------------------------------------
+
+CREATE TABLE admin (
+    id_admin INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    nivel_acceso INT NOT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (id_usuario)
+        REFERENCES user(id)
+);
+
+
+-- --------------------------------------------------------
+-- TABLA: parking
+-- --------------------------------------------------------
+
+CREATE TABLE parking (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    espacios_disponibles INT NOT NULL,
+    espacios_ocupados INT NOT NULL,
+    matriculas_vehiculo VARCHAR(20) NULL
+);
+
+
+-- --------------------------------------------------------
+-- TABLA: inventario_premios
+-- --------------------------------------------------------
+
+CREATE TABLE inventario_premios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT NULL,
+    cantidad INT NOT NULL DEFAULT 0,
+    estado ENUM('Disponible', 'Agotado', 'Inactivo') DEFAULT 'Disponible'
+);
+
+
+-- --------------------------------------------------------
+-- TABLA: competencias
+-- --------------------------------------------------------
+
+CREATE TABLE competencias (
+    id_competencia INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT NULL,
+    fecha DATE NOT NULL,
+    lugar VARCHAR(100) NULL,
+    estado VARCHAR(50) NOT NULL
+);
+
+
+-- --------------------------------------------------------
+-- TABLA: inscripciones
+-- Relaciona usuarios con competencias
+-- --------------------------------------------------------
+
+CREATE TABLE inscripciones (
+    id_inscripcion INT AUTO_INCREMENT PRIMARY KEY,
+    id_user INT NOT NULL,
+    id_competencia INT NOT NULL,
+
+    FOREIGN KEY (id_user)
+        REFERENCES user(id),
+
+    FOREIGN KEY (id_competencia)
+        REFERENCES competencias(id_competencia)
+);
+
+
+-- --------------------------------------------------------
+-- TABLA: premios_competencia
+-- Relaciona competencias con sus premios
+-- --------------------------------------------------------
+
+
+
+-- --------------------------------------------------------
+-- TABLA: funcional_futbol
+-- --------------------------------------------------------
+
+CREATE TABLE funcional_futbol (
+    id_funcional INT AUTO_INCREMENT PRIMARY KEY,
+    equipo VARCHAR(100) NOT NULL,
+    lugar VARCHAR(100) NOT NULL
+);
+
+
+-- --------------------------------------------------------
+-- TABLA: inscripciones_funcional
+-- Relaciona usuarios con funcional/fútbol
+-- --------------------------------------------------------
+
+CREATE TABLE inscripciones_funcional (
+    id_inscripcion INT AUTO_INCREMENT PRIMARY KEY,
+    id_user INT NOT NULL,
+    id_funcional INT NOT NULL,
+
+    FOREIGN KEY (id_user)
+        REFERENCES user(id),
+
+    FOREIGN KEY (id_funcional)
+        REFERENCES funcional_futbol(id_funcional)
+);
+
+
+-- --------------------------------------------------------
+-- TABLA: cuotas
+-- --------------------------------------------------------
+
+CREATE TABLE cuotas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    monto DECIMAL(10,2) NOT NULL,
+    fecha_pago DATE NULL,
+    fecha_vencimiento DATE NOT NULL,
+    estado ENUM('Pagada', 'Pendiente', 'Vencida') DEFAULT 'Pendiente',
+
+    FOREIGN KEY (usuario_id)
+        REFERENCES user(id)
+);
+
+CREATE TABLE premios_competencia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    competencia_id INT NOT NULL,
+    premio_id INT NOT NULL,
+    puesto INT NOT NULL,
+    cantidad INT NOT NULL DEFAULT 1,
+    FOREIGN KEY (competencia_id) REFERENCES competencias(id_competencia),
+    FOREIGN KEY (premio_id) REFERENCES inventario_premios(id)
 );
 
 -- ========================================================
--- 2. POBLACIÓN DE DATOS (DML - INSERTS)
+-- 2. POBLACIÓN DE DATOS
 -- ========================================================
 
--- Insertar Marcas (Dejamos a Tesla sin vehículos para probar LEFT/RIGHT JOIN)
-INSERT INTO MARCAS (nombre_marca, pais_origen) VALUES 
-('Toyota', 'Japón'),
-('Volkswagen', 'Alemania'),
-('Ford', 'Estados Unidos'),
-('Chevrolet', 'Estados Unidos'),
-('Tesla', 'Estados Unidos');
+-- --------------------------------------------------------
+-- PREMIOS DEL INVENTARIO
+-- --------------------------------------------------------
 
--- Insertar Vehículos
-INSERT INTO VEHICULOS (id_marca, modelo, anio, precio, estado) VALUES 
-(1, 'Corolla', 2023, 25000.00, 'Nuevo'),
-(1, 'Hilux', 2019, 32000.00, 'Usado'),
-(2, 'Golf', 2018, 18000.00, 'Usado'),
-(2, 'Taos', 2024, 35000.00, 'Nuevo'),
-(3, 'Mustang', 2021, 45000.00, 'Usado'),
-(3, 'Ranger', 2024, 40000.00, 'Nuevo'),
-(4, 'Onix', 2022, 15000.00, 'Usado');
-
--- Insertar Clientes (Ana López y Pedro Gómez no tienen teléfono)
-INSERT INTO CLIENTES (nombre_completo, email, telefono) VALUES 
-('Martín Silva', 'martin.silva@email.com', '099123456'),
-('Ana López', 'ana.lopez@email.com', NULL),
-('Carlos Rodríguez', 'carlos.r@email.com', '098765432'),
-('Laura Martínez', 'laura.m@email.com', '091555666'),
-('Pedro Gómez', 'pedro.gomez@email.com', NULL);
-
--- Insertar Empleados
-INSERT INTO EMPLEADOS (nombre_completo, cargo, salario) VALUES 
-('Roberto Sánchez', 'Vendedor Junior', 30000.00),
-('Sofía Acosta', 'Vendedora Senior', 45000.00),
-('Diego Fernández', 'Gerente de Ventas', 70000.00);
-
--- Insertar Ventas (Dejamos vehículos sin vender para hacer pruebas)
-INSERT INTO VENTAS (id_vehiculo, id_cliente, id_empleado, fecha_venta, monto_total) VALUES 
-(1, 1, 2, '2024-01-15', 25000.00), -- Martín compró el Corolla con Sofía
-(3, 2, 1, '2024-02-10', 17500.00), -- Ana compró el Golf con Roberto (con un pequeño descuento)
-(5, 4, 2, '2024-03-22', 45000.00), -- Laura compró el Mustang con Sofía
-(2, 3, 3, '2024-04-05', 31000.00); -- Carlos compró la Hilux con Diego
-
+INSERT INTO inventario_premios
+(nombre, descripcion, cantidad)
+VALUES
+('Gatorade', 'Bebida deportiva', 30),
+('Pack Gatorade', 'Pack de bebidas deportivas', 10),
+('Proteína Whey', 'Suplemento de proteína en polvo', 8),
+('Creatina Monohidratada', 'Suplemento de creatina', 12),
+('Barras Proteicas', 'Barras con alto contenido de proteína', 25),
+('Pre-entreno', 'Suplemento pre-entrenamiento', 6),
+('Multivitamínico', 'Suplemento de vitaminas y minerales', 10),
+('Shaker FitPower', 'Vaso mezclador para suplementos', 15),
+('Botella Deportiva', 'Botella reutilizable', 20),
+('Remera FitPower', 'Remera deportiva oficial', 10),
+('Toalla Deportiva', 'Toalla deportiva con logo FitPower', 8),
+('Mochila Deportiva', 'Mochila para entrenamiento', 5);

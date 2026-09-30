@@ -1,12 +1,13 @@
 :root {
-  --fondo: #0c0c0c;
-  --caja: #1c1c1c;
-  --borde-caja: #2a2a2a;
-  --gris-piola: #9a9a9a;
-  --gris-letrero: #b3b3b3;
-  --azulclaro: #2b4392;
-  --azuloscuro: #012c57;
-  --azul-suave: rgba(94, 200, 242, 0.12);
+  --fondo: #0a0a0a;
+  --caja: #181818;
+  --borde-caja: #242424;
+  --gris-piola: #7d7d7d;
+  --gris-letrero: #8a8a8a;
+  --azulclaro: #2f6bff;
+  --azuloscuro: #2f6bff;
+  --azul-suave: rgba(47, 107, 255, 0.14);
+  --azul-borde: rgba(47, 107, 255, 0.35);
 }
 
 * {
@@ -14,31 +15,30 @@
 }
 
 .back-link {
-    position: absolute;
-    top: 90px;
-    left: 40px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: #a0a0a0;
-    text-decoration: none;
-    text-transform: uppercase;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    transition: color 0.2s ease;
-    z-index: 10;
+  position: absolute;
+  top: 90px;
+  left: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #a0a0a0;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: color 0.2s ease;
+  z-index: 10;
 }
 
 .back-link:hover {
-    color: var(--azulclaro);
+  color: var(--azulclaro);
 }
 
 .back-arrow {
-    font-size: 1.1rem;
-    line-height: 1;
+  font-size: 1.1rem;
+  line-height: 1;
 }
-
 
 body {
   margin: 0;
@@ -52,50 +52,52 @@ body {
 
 .tarjeta {
   width: 340px;
+  max-width: 90vw;
   padding: 32px 0;
 }
 
-
+/* Logo */
 .titulo {
-  font-size: 64px;
-  font-weight: 700;
+  font-size: 30px;
+  font-weight: 400;
   font-family: "Bebas Neue", sans-serif;
   text-align: center;
-  margin: 0 0 40px 0;
-  letter-spacing: 2px;
+  margin: 0 0 56px 0;
+  letter-spacing: 3px;
 }
 
 .blanco {
-  color: rgb(255, 255, 255);
+  color: #fff;
 }
 
 .azul {
   color: var(--azulclaro);
 }
 
-
+/* Inputs */
 .renglon {
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 
 .renglon label {
   display: block;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   color: var(--gris-letrero);
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   text-transform: uppercase;
 }
 
 .renglon input {
   width: 100%;
-  padding: 16px 18px;
-  border-radius: 999px;
+  padding: 14px 16px;
+  border-radius: 12px;
   border: 1px solid var(--borde-caja);
   background-color: var(--caja);
   color: #fff;
-  font-size: 15px;
+  font-size: 13px;
+  font-family: inherit;
   outline: none;
   transition: border-color 0.2s ease;
 }
@@ -108,21 +110,25 @@ body {
   border-color: var(--azulclaro);
 }
 
+/* Selector de rol */
+.quienentra {
+  margin-top: 22px;
+}
 
 .quienentra .letrero {
   display: block;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   color: var(--gris-letrero);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   text-transform: uppercase;
 }
 
 .opciones {
   display: flex;
-  gap: 10px;
-  margin-bottom: 28px;
+  gap: 8px;
+  margin-bottom: 22px;
 }
 
 .opcion {
@@ -130,22 +136,24 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 16px 8px;
-  border-radius: 16px;
+  padding: 16px 6px;
+  border-radius: 12px;
   border: 1px solid var(--borde-caja);
   background-color: var(--caja);
   color: var(--gris-piola);
-  font-size: 11px;
+  font-family: inherit;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .opcion svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   stroke: var(--gris-piola);
   transition: stroke 0.2s ease;
 }
@@ -156,7 +164,7 @@ body {
 
 .opcion.elegida {
   background-color: var(--azul-suave);
-  border-color: var(--azulclaro);
+  border-color: var(--azul-borde);
   color: var(--azulclaro);
 }
 
@@ -164,15 +172,16 @@ body {
   stroke: var(--azulclaro);
 }
 
-
+/* Botón principal */
 .botonentrar {
   width: 100%;
-  padding: 18px;
-  border-radius: 999px;
+  padding: 16px;
+  border-radius: 12px;
   border: none;
-  background: linear-gradient(90deg, var(--azuloscuro), var(--azulclaro));
-  color: #fff;
-  font-size: 15px;
+  background: var(--azulclaro);
+  color: #0a0a0a;
+  font-family: inherit;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -181,14 +190,14 @@ body {
 }
 
 .botonentrar:hover {
-  filter: brightness(1.08);
+  filter: brightness(1.1);
 }
 
-
+/* Pie */
 .abajo {
   text-align: center;
-  margin-top: 24px;
-  font-size: 11px;
-  color: #5c5c5c;
+  margin-top: 22px;
+  font-size: 10px;
+  color: #4a4a4a;
   letter-spacing: 0.5px;
 }

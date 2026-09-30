@@ -1,4 +1,5 @@
 <?php
+session_start();
 header('Content-Type: application/json');
 
 // Configuración correcta según tu docker-compose.yml
@@ -13,7 +14,7 @@ try {
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode([
-        'status'  => 'error', 
+        'status'  => 'error',
         'message' => 'Error de conexión a la BD: ' . $e->getMessage()
     ]);
     exit;
@@ -32,8 +33,8 @@ if (empty($email) || empty($password)) {
     exit;
 }
 
-// Consulta ajustada a tu tabla 'user' y columna 'contrasena'
-$stmt = $pdo->prepare("SELECT * FROM user WHERE email = :email AND LOWER(rol) = LOWER(:rol) LIMIT 1");
+// CAMBIO: solo usuarios Activos pueden entrar
+$stmt = $pdo->prepare("SELECT * FROM user WHERE email = :email AND LOWER(rol) = LOWER(:rol) AND estado = 'Activo' LIMIT 1");
 $stmt->execute([
     'email' => $email,
     'rol'   => $rol
@@ -45,6 +46,14 @@ if ($usuario) {
     $passwordCorrecta = ($password === $usuario['contrasena']) || password_verify($password, $usuario['contrasena']);
 
     if ($passwordCorrecta) {
+        // CAMBIO: guardar la sesión para que admin.php sepa quién es
+        session_regenerate_id(true);
+        $_SESSION['id']  = $usuario['id'];
+        $_SESSION['rol'] = strtolower($usuario['rol']);
+
+        // CAMBIO: marcar "en línea" (se ignora si aún no corriste la migración)
+        try { $pdo->prepare("UPDATE user SET ultima_actividad = NOW() WHERE id = ?")->execute([$usuario['id']]); } catch (PDOException $e) {}
+
         http_response_code(200);
         echo json_encode([
             'status'  => 'success',
@@ -63,6 +72,6 @@ if ($usuario) {
 // Credenciales o rol incorrectos
 http_response_code(401);
 echo json_encode([
-    'status'  => 'error', 
+    'status'  => 'error',
     'message' => 'Email, contraseña o rol incorrectos'
 ]);

@@ -1,19 +1,229 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Prueba - FitPower</title>
-  <style>
-    body { background: #111827; color: #fff; font-family: system-ui, sans-serif; display: flex; height: 100vh; align-items: center; justify-content: center; margin: 0; }
-    .card { background: #1f2937; padding: 2.5rem; border-radius: 12px; text-align: center; border: 1px solid #374151; }
-    a { color: #3b82f6; text-decoration: none; font-weight: 600; display: inline-block; margin-top: 1rem; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administrador - FitPower</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--fondo:#0a0a0a;--caja:#141414;--caja2:#1a1a1a;--borde:#242424;--txt:#fff;--gris:#8a8a8a;--azul:#2f6bff;--azul-s:rgba(47,107,255,.14);--verde:#22c55e;--amarillo:#facc15;--rojo:#ef4444}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--txt);font-family:"Inter","Segoe UI",sans-serif;font-size:14px;min-height:100vh}
+button,input,select{font-family:inherit}
+header{display:flex;align-items:center;gap:28px;padding:14px 32px;border-bottom:1px solid var(--borde);position:sticky;top:0;background:rgba(10,10,10,.92);backdrop-filter:blur(8px);z-index:20}
+.logo{font-family:"Bebas Neue",sans-serif;font-size:28px;letter-spacing:3px}.logo b{color:var(--azul);font-weight:400}
+nav{display:flex;gap:4px;flex:1;overflow-x:auto}
+nav button{background:none;border:0;color:var(--gris);padding:9px 14px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}
+nav button:hover{color:#fff}nav button.on{background:var(--azul-s);color:var(--azul)}
+.vivo{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--gris);letter-spacing:.5px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--verde);box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulso 1.8s infinite}
+@keyframes pulso{70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.perfil{position:relative}
+.avatar{width:42px;height:42px;border-radius:50%;border:0;cursor:pointer;background:linear-gradient(135deg,#bfeaff 0%,#5ec8f2 55%,#2aa3e0 100%);color:#002a5c;font-weight:800;font-size:15px;letter-spacing:.5px;text-shadow:0 1px 0 rgba(255,255,255,.55);box-shadow:0 0 0 2px var(--fondo),0 0 0 4px rgba(94,200,242,.55)}
+.menu{display:none;position:absolute;right:0;top:54px;width:210px;background:var(--caja);border:1px solid var(--borde);border-radius:14px;padding:8px;box-shadow:0 20px 40px rgba(0,0,0,.6)}
+.menu.abierto{display:block}
+.menu p{margin:0;padding:10px 12px 12px;border-bottom:1px solid var(--borde);font-size:12px;color:var(--gris)}.menu p b{display:block;color:#fff;font-size:14px}
+.menu button{width:100%;margin-top:6px;background:none;border:0;color:#fff;text-align:left;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+.menu button:hover{background:rgba(239,68,68,.12);color:var(--rojo)}
+main{max-width:1200px;margin:0 auto;padding:32px}
+h2{margin:0 0 4px;font-size:22px;font-weight:800}.sub{color:var(--gris);margin:0 0 24px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:22px}
+.card{background:var(--caja);border:1px solid var(--borde);border-radius:16px;padding:20px}
+.kpi small{display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gris);font-weight:600}
+.kpi strong{display:block;font-size:34px;font-weight:800;margin-top:8px}.kpi span{font-size:12px;color:var(--gris)}
+.kpi.az{background:linear-gradient(135deg,#0b2a7a,var(--azul));border:0}.kpi.az small,.kpi.az span{color:rgba(255,255,255,.75)}
+.barra{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.btn{background:var(--azul);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;font-size:12px;cursor:pointer;letter-spacing:.5px}
+.btn:hover{filter:brightness(1.12)}.btn.sec{background:var(--caja2);border:1px solid var(--borde);color:#ddd}
+.btn.x{background:none;border:1px solid var(--borde);color:var(--gris);padding:6px 10px}.btn.x:hover{border-color:var(--rojo);color:var(--rojo)}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gris);text-align:left;padding:10px 14px;font-weight:600}
+td{padding:12px 14px;border-top:1px solid var(--borde)}
+tr.baja td{opacity:.45}
+.tabla{overflow-x:auto;padding:6px}
+.tag{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;font-size:11px;font-weight:700}
+.tag i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.t-paga{color:var(--verde);background:rgba(34,197,94,.12)}.t-retrasada{color:var(--amarillo);background:rgba(250,204,21,.12)}
+.t-nopaga{color:var(--rojo);background:rgba(239,68,68,.12)}.t-baja{color:var(--gris);background:#222}
+.dias{width:64px;background:var(--caja2);border:1px solid var(--borde);color:#fff;border-radius:8px;padding:7px;text-align:center;font-weight:700}
+.dias:focus,.campo input:focus,.campo select:focus{outline:0;border-color:var(--azul)}
+.on-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#444;margin-right:8px}.on-dot.si{background:var(--verde)}
+.dosc{display:grid;grid-template-columns:260px 1fr;gap:14px}
+.lista button{display:block;width:100%;text-align:left;background:none;border:1px solid transparent;color:#ccc;padding:12px 14px;border-radius:10px;cursor:pointer;font-weight:600;margin-bottom:4px}
+.lista button.on{background:var(--azul-s);border-color:rgba(47,107,255,.35);color:var(--azul)}
+.ej{display:flex;align-items:center;gap:14px;padding:12px 4px;border-top:1px solid var(--borde)}.ej:first-of-type{border-top:0}
+.ej .n{width:28px;height:28px;border-radius:8px;background:var(--azul-s);color:var(--azul);display:grid;place-items:center;font-weight:800;font-size:12px}.ej div{flex:1}.ej small{color:var(--gris)}
+.barras{display:flex;align-items:flex-end;gap:14px;height:170px;margin-top:16px}
+.barras div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;font-size:11px;color:var(--gris)}
+.barras i{width:100%;border-radius:8px 8px 0 0;background:linear-gradient(180deg,var(--azul),#0b2a7a);min-height:4px}.barras div:last-child i{background:linear-gradient(180deg,#7fb0ff,var(--azul))}
+.sem{display:flex;gap:10px;flex-wrap:wrap}.sem .tag{font-size:12px;padding:8px 14px}
+.fondo-m{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;place-items:center;z-index:50}.fondo-m.abierto{display:grid}
+.modal{width:min(400px,92vw);background:var(--caja);border:1px solid var(--borde);border-radius:18px;padding:24px}
+.modal h3{margin:0 0 16px}.campo{margin-bottom:12px}
+.campo label{display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gris);margin-bottom:6px;font-weight:600}
+.campo input,.campo select{width:100%;background:var(--caja2);border:1px solid var(--borde);color:#fff;border-radius:10px;padding:12px}
+.acc{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--azul);color:#fff;padding:12px 20px;border-radius:12px;font-weight:600;font-size:13px;display:none;z-index:60}
+@media(max-width:760px){header{padding:12px 16px;gap:14px}.vivo span{display:none}main{padding:20px 16px}.dosc{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <div class="card">
-    <h1>¡Login Exitoso en ADMINISTRADOR! 🎉</h1>
-    <p>Redirección correcta desde el backend.</p>
-    <a href="login.html">← Volver al Login</a>
+<header>
+  <div class="logo">FIT<b>POWER</b></div>
+  <nav id="nav"></nav>
+  <div class="vivo"><i class="dot"></i><span id="hora">EN VIVO</span></div>
+  <div class="perfil">
+    <button class="avatar" id="avatar" title="Mi perfil"></button>
+    <div class="menu" id="menu">
+      <p><b id="adminNombre"></b>Administrador</p>
+      <button id="salir">Cerrar sesión</button>
+    </div>
   </div>
+</header>
+<main id="vista"></main>
+<div class="fondo-m" id="fm"><div class="modal" id="modal"></div></div>
+<div id="toast"></div>
+
+<script src="../js/api.js"></script>
+<script>
+/* ============ ESTADO (viene de la base de datos vía admin.php) ============ */
+let usuarios = [], entrenadores = [], rutinas = [], fin = {meses:[],pendiente:0,vencida:0};
+let ADMIN = {nombre:'Admin',apellido:''}, tab = 'resumen', rutinaSel = null, cargado = false;
+
+/* ============ HELPERS ============ */
+const $ = s => document.querySelector(s);
+const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Semáforo según la última cuota: Pagada=verde · Pendiente=amarillo · Vencida=rojo
+const ESTADO = {Pagada:'paga',Pendiente:'retrasada',Vencida:'nopaga'};
+const ETQ = {paga:'Paga',retrasada:'Retrasada',nopaga:'No paga',sinc:'Sin cuota'};
+const estado = u => ESTADO[u.cuota] || 'sinc';
+const tag = e => `<span class="tag ${e==='sinc'?'t-baja':'t-'+e}"><i></i>${ETQ[e]}</span>`;
+const $$ = n => '$' + Number(n||0).toLocaleString('es');
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2800)}
+
+/* ============ API ============ */
+async function cargar(){
+  const r = await API.adminTodo();
+  if(r.code === 'no_auth'){ window.location.href = 'login.html'; return; }
+  if(r.status !== 'success'){ toast(r.message || 'Error al cargar datos'); return; }
+  ({usuarios, entrenadores, rutinas, fin} = r.data);
+  ADMIN = r.data.admin || ADMIN;
+  if(!rutinas.some(x => x.id == rutinaSel)) rutinaSel = rutinas[0]?.id ?? null;
+  cargado = true; pintarPerfil(); render();
+}
+async function accion(a, d){
+  const r = await API.adminAccion(a, d);
+  if(r.status !== 'success'){ toast(r.message || 'No se pudo completar'); return false; }
+  await cargar(); return true;
+}
+
+/* ============ MODAL ============ */
+function modal(titulo, campos, ok){
+  $('#modal').innerHTML = `<h3>${titulo}</h3>` + campos.map(c => `<div class="campo"><label>${c.l}</label><input data-k="${c.k}" type="${c.t||'text'}" placeholder="${c.p||''}"></div>`).join('') +
+    `<div class="acc"><button class="btn sec" id="mNo">Cancelar</button><button class="btn" id="mOk">Guardar</button></div>`;
+  $('#fm').classList.add('abierto');
+  $('#mNo').onclick = () => $('#fm').classList.remove('abierto');
+  $('#mOk').onclick = async () => {
+    const v = {}; document.querySelectorAll('#modal [data-k]').forEach(i => v[i.dataset.k] = i.value.trim());
+    if(campos.some(c => !v[c.k])) return toast('Completá todos los campos');
+    if(await ok(v)) $('#fm').classList.remove('abierto');
+  };
+}
+
+/* ============ VISTAS ============ */
+const vacio = t => `<p class="sub" style="padding:16px">${t}</p>`;
+const vistas = {
+  resumen(){
+    const on = usuarios.filter(u=>u.online).length, ent = entrenadores.filter(e=>e.online).length;
+    const c = e => usuarios.filter(u=>estado(u)===e).length;
+    const cobrado = fin.meses.length ? fin.meses[fin.meses.length-1].v : 0;
+    return `<h2>Resumen</h2><p class="sub">Actividad del gimnasio en tiempo real</p>
+    <div class="grid">
+      <div class="card kpi az"><small>Usuarios activos ahora</small><strong>${on}</strong><span>de ${usuarios.length} socios</span></div>
+      <div class="card kpi"><small>Entrenadores en línea</small><strong>${ent}</strong><span>de ${entrenadores.length} en total</span></div>
+      <div class="card kpi"><small>Cobrado este mes</small><strong>${$$(cobrado)}</strong><span>${c('paga')} socios al día</span></div>
+      <div class="card kpi"><small>Pendiente de cobro</small><strong>${$$(fin.pendiente+fin.vencida)}</strong><span>${c('retrasada')+c('nopaga')} socios con deuda</span></div>
+    </div>
+    <div class="card"><small style="font-size:10px;letter-spacing:1px;color:var(--gris);font-weight:600">SEMÁFORO DE CUOTAS</small>
+      <div class="sem" style="margin-top:12px">${['paga','retrasada','nopaga'].map(e=>`<span class="tag t-${e}"><i></i>${ETQ[e]} · ${c(e)}</span>`).join('')}<span class="tag t-baja"><i></i>Sin cuota · ${c('sinc')}</span></div></div>`;
+  },
+  usuarios(){
+    return `<div class="barra"><div><h2>Usuarios</h2><p class="sub" style="margin:0">Estado de la última cuota de cada socio</p></div>
+      <button class="btn" id="addU">+ Agregar usuario</button></div>
+    <div class="card tabla">${usuarios.length ? `<table><thead><tr><th>Socio</th><th>Email</th><th>Cuota</th><th>Estado</th><th></th></tr></thead><tbody>${
+      usuarios.map(u=>`<tr><td><span class="on-dot ${u.online?'si':''}"></span>${esc(u.nombre)} ${esc(u.apellido)}</td>
+      <td>${esc(u.email)}</td><td>${u.monto!=null?$$(u.monto):'—'}</td><td>${tag(estado(u))}</td>
+      <td style="text-align:right"><button class="btn x" data-del="${u.id}">Quitar</button></td></tr>`).join('')}</tbody></table>` : vacio('No hay socios activos.')}</div>`;
+  },
+  entrenadores(){
+    return `<div class="barra"><div><h2>Entrenadores</h2><p class="sub" style="margin:0">Equipo del gimnasio</p></div><button class="btn" id="addE">+ Agregar entrenador</button></div>
+    <div class="card tabla">${entrenadores.length ? `<table><thead><tr><th>Nombre</th><th>Email</th><th>Estado</th><th></th></tr></thead><tbody>${
+      entrenadores.map(e=>`<tr><td>${esc(e.nombre)} ${esc(e.apellido)}</td><td>${esc(e.email)}</td>
+      <td><span class="on-dot ${e.online?'si':''}"></span>${e.online?'En línea':'Desconectado'}</td>
+      <td style="text-align:right"><button class="btn x" data-delE="${e.id}">Quitar</button></td></tr>`).join('')}</tbody></table>` : vacio('No hay entrenadores activos.')}</div>`;
+  },
+  rutinas(){
+    const r = rutinas.find(x=>x.id==rutinaSel);
+    if(!r) return `<h2>Rutinas</h2>${vacio('Todavía no hay rutinas cargadas.')}`;
+    return `<h2>Rutinas</h2><p class="sub">Gestioná los ejercicios de cada rutina</p>
+    <div class="dosc"><div class="card lista">${rutinas.map(x=>`<button class="${x.id==r.id?'on':''}" data-r="${x.id}">${esc(x.nombre)}</button>`).join('')}</div>
+    <div class="card"><div class="barra"><strong style="font-size:16px">${esc(r.nombre)}</strong><button class="btn" id="addEj">+ Agregar ejercicio</button></div>
+      ${r.ej.length ? r.ej.map((x,i)=>`<div class="ej"><span class="n">${i+1}</span><div>${esc(x.n)}<br><small>${esc(x.s)}</small></div><button class="btn x" data-delEj="${x.id}">Eliminar</button></div>`).join('') : '<p class="sub">Sin ejercicios todavía.</p>'}</div></div>`;
+  },
+  finanzas(){
+    const s = fin.meses, max = Math.max(...s.map(x=>x.v),1), actual = s.length ? s[s.length-1].v : 0;
+    return `<h2>Finanzas</h2><p class="sub">Ingresos y estado de cuotas</p>
+    <div class="grid"><div class="card kpi az"><small>Ingresos del mes</small><strong>${$$(actual)}</strong><span>cuotas pagadas</span></div>
+      <div class="card kpi"><small>Pendientes</small><strong style="color:var(--amarillo)">${$$(fin.pendiente)}</strong><span>cuotas por cobrar</span></div>
+      <div class="card kpi"><small>Vencidas</small><strong style="color:var(--rojo)">${$$(fin.vencida)}</strong><span>cuotas sin pagar a tiempo</span></div></div>
+    <div class="card"><small style="font-size:10px;letter-spacing:1px;color:var(--gris);font-weight:600">INGRESOS ÚLTIMOS 6 MESES</small>
+      <div class="barras">${s.map(x=>`<div>${$$(x.v)}<i style="height:${x.v/max*78}%"></i>${x.m}</div>`).join('')}</div></div>`;
+  }
+};
+
+/* ============ RENDER + EVENTOS ============ */
+const TABS = [['resumen','Resumen'],['usuarios','Usuarios'],['entrenadores','Entrenadores'],['rutinas','Rutinas'],['finanzas','Finanzas']];
+function render(){
+  $('#nav').innerHTML = TABS.map(([k,n])=>`<button class="${k===tab?'on':''}" data-t="${k}">${n}</button>`).join('');
+  $('#vista').innerHTML = cargado ? vistas[tab]() : vacio('Cargando...');
+  $('#hora').textContent = 'EN VIVO · ' + new Date().toLocaleTimeString('es');
+}
+const pedirPersona = (rol, titulo) => modal(titulo, [
+  {k:'nombre',l:'Nombre'},{k:'apellido',l:'Apellido'},{k:'cedula',l:'Cédula'},
+  {k:'email',l:'Email',t:'email'},{k:'contrasena',l:'Contraseña',t:'password'}], v => accion('crear_persona', {...v, rol}));
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); const d = t ? t.dataset : {};
+  if(!e.target.closest('.perfil')) $('#menu').classList.remove('abierto');
+  if(!t) return;
+  if(d.t){ tab = d.t; return render(); }
+  if(d.r){ rutinaSel = +d.r; return render(); }
+  if(d.del){ if(confirm('¿Quitar este usuario?')) accion('quitar_persona', {id:+d.del}); return; }
+  if(d.delE){ if(confirm('¿Quitar este entrenador?')) accion('quitar_persona', {id:+d.delE}); return; }
+  if(d.delEj){ accion('quitar_ejercicio', {rutina_id:rutinaSel, ejercicio_id:+d.delEj}); return; }
+  if(t.id==='addU') return pedirPersona('Socio','Nuevo usuario');
+  if(t.id==='addE') return pedirPersona('Entrenador','Nuevo entrenador');
+  if(t.id==='addEj') return modal('Nuevo ejercicio',[{k:'nombre',l:'Ejercicio'},{k:'series',l:'Series',t:'number',p:'4'},{k:'repeticiones',l:'Repeticiones',t:'number',p:'10'}],
+    v => accion('agregar_ejercicio', {...v, rutina_id:rutinaSel}));
+});
+
+/* Perfil + logout */
+function pintarPerfil(){
+  const ini = ((ADMIN.nombre||'A')[0] + (ADMIN.apellido||'')[0]).toUpperCase();
+  $('#avatar').textContent = ini; $('#adminNombre').textContent = `${ADMIN.nombre} ${ADMIN.apellido}`;
+}
+$('#avatar').onclick = () => $('#menu').classList.toggle('abierto');
+$('#salir').onclick = async () => {
+  try{ await API.logout(); }catch(_){}
+  localStorage.clear(); sessionStorage.clear(); window.location.href = 'login.html';
+};
+
+/* Tiempo real: refresca cada 5 s (y avisa que el admin está en línea) */
+setInterval(() => { if(!$('#fm').classList.contains('abierto')) cargar(); }, 5000);
+setInterval(() => API.ping(), 60000);
+render(); cargar();
+</script>
 </body>
 </html>

@@ -51,5 +51,63 @@ const API = {
      */
     async logout() {
         return await this.request('/logout.php', 'POST');
+    },
+
+    // ==========================================
+    // PANEL DE ADMINISTRADOR
+    // ==========================================
+
+    /** Trae usuarios, entrenadores, rutinas y finanzas de una sola vez */
+    async adminTodo() {
+        return await this.request('/admin.php?accion=todo');
+    },
+
+    /**
+     * Ejecuta una acción del admin:
+     * crear_persona | quitar_persona | agregar_ejercicio | quitar_ejercicio
+     */
+    async adminAccion(accion, datos = {}) {
+        return await this.request('/admin.php?accion=' + accion, 'POST', datos);
+    },
+
+    // ==========================================
+    // PANEL DE SOCIO
+    // ==========================================
+
+    /** Trae plan, rutinas, clases, entrenadores y quejas del socio logueado */
+    async socioTodo() {
+        return await this.request('/socio.php?accion=todo');
+    },
+
+    /**
+     * Ejecuta una acción del socio:
+     * anotar_clase | cancelar_clase | escribir_queja | borrar_queja |
+     * comprar_plan | guardar_objetivo | elegir_entrenador
+     */
+    async socioAccion(accion, datos = {}) {
+        return await this.request('/socio.php?accion=' + accion, 'POST', datos);
+    },
+
+    // ==========================================
+    // PANEL DE ENTRENADOR
+    // ==========================================
+
+    /** Trae ejercicios, rutinas y alumnos (con sus objetivos y rutinas asignadas) */
+    async entrenadorTodo() {
+        return await this.request('/entrenador.php?accion=todo');
+    },
+
+    /**
+     * Ejecuta una acción del entrenador:
+     * crear_ejercicio | borrar_ejercicio | crear_rutina | borrar_rutina |
+     * asignar_rutina | quitar_asignacion
+     */
+    async entrenadorAccion(accion, datos = {}) {
+        return await this.request('/entrenador.php?accion=' + accion, 'POST', datos);
+    },
+
+    /** Avisa que el usuario logueado está en línea (llamar cada ~1 min desde cualquier panel) */
+    async ping() {
+        return await this.request('/admin.php?accion=ping', 'POST', {});
     }
 };

@@ -3,7 +3,7 @@ services:
   # Servidor Web + PHP (front + api)
   app:
     build: .
-    container_name: ${APP_NAME}_app
+    container_name: proyecto_app
     ports:
       - "8080:80"
     volumes:
@@ -14,7 +14,7 @@ services:
   # Base de Datos MySQL
   db:
     image: mysql:8.0
-    container_name: ${APP_NAME}_db
+    container_name: proyecto_db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root_password
@@ -30,7 +30,7 @@ services:
   # Interfaz gráfica para MySQL
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: ${APP_NAME}_phpmyadmin
+    container_name: proyecto_phpmyadmin
     ports:
       - "8081:80"
     environment:

@@ -251,6 +251,8 @@ CREATE TABLE cuotas (
     fecha_pago DATE NULL,
     fecha_vencimiento DATE NOT NULL,
     estado ENUM('Pagada', 'Pendiente', 'Vencida') DEFAULT 'Pendiente',
+    pago_mostrador DATE NULL,
+    metodo_pago VARCHAR(40) NULL,
 
     FOREIGN KEY (usuario_id)
         REFERENCES user(id)
@@ -315,6 +317,23 @@ CREATE TABLE quejas (
     id_user INT NOT NULL,
     texto TEXT NOT NULL,
     fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (id_user)
+        REFERENCES user(id)
+);
+
+
+-- --------------------------------------------------------
+-- TABLA: parking_reservas
+-- Estacionamiento: lugares 01-20 plan Pro, 21-25 solo Premium (definidos en socio.php).
+-- La tabla "parking" original queda sin usar.
+-- --------------------------------------------------------
+
+CREATE TABLE parking_reservas (
+    lugar INT NOT NULL PRIMARY KEY,
+    id_user INT NOT NULL UNIQUE,
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+    expira DATETIME NOT NULL,
 
     FOREIGN KEY (id_user)
         REFERENCES user(id)
@@ -515,3 +534,11 @@ INSERT INTO clases (nombre, id_entrenador, dia_hora, cupo) VALUES
 ('Running Grupal', (SELECT id FROM user WHERE email='joaquin@fitpower.com'), NOW() + INTERVAL 3 DAY + INTERVAL 1 HOUR, 20),
 ('Movilidad',      (SELECT id FROM user WHERE email='valeria@fitpower.com'), NOW() + INTERVAL 4 DAY + INTERVAL 4 HOUR, 10),
 ('Fuerza Total',   (SELECT id FROM user WHERE email='nicolas@fitpower.com'), NOW() + INTERVAL 5 DAY + INTERVAL 2 HOUR, 15);
+
+-- --------------------------------------------------------
+-- RESERVAS DE ESTACIONAMIENTO (ejemplo): Camila en el 07 y Diego en el 22
+-- --------------------------------------------------------
+
+INSERT INTO parking_reservas (lugar, id_user, expira) VALUES
+(7,  (SELECT id FROM user WHERE email='camila@gmail.com'), NOW() + INTERVAL 4 HOUR),
+(22, (SELECT id FROM user WHERE email='diego@gmail.com'),  NOW() + INTERVAL 4 HOUR);

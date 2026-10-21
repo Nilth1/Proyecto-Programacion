@@ -37,7 +37,7 @@ h2{margin:0 0 4px;font-size:22px;font-weight:800}.sub{color:var(--gris);margin:0
 .barra{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .btn{background:var(--azul);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;font-size:12px;cursor:pointer;letter-spacing:.5px}
 .btn:hover{filter:brightness(1.12)}.btn.sec{background:var(--caja2);border:1px solid var(--borde);color:#ddd}
-.btn.x{background:none;border:1px solid var(--borde);color:var(--gris);padding:6px 10px}.btn.x:hover{border-color:var(--rojo);color:var(--rojo)}
+.btn.x{background:none;border:1px solid var(--borde);color:var(--gris);padding:6px 10px}.btn.x:hover{border-color:var(--rojo);color:var(--rojo)}.btn.e{margin-right:6px}.btn.e:hover{border-color:var(--azul);color:var(--azul)}
 table{width:100%;border-collapse:collapse}
 th{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gris);text-align:left;padding:10px 14px;font-weight:600}
 td{padding:12px 14px;border-top:1px solid var(--borde)}
@@ -121,13 +121,13 @@ async function accion(a, d){
 
 /* ============ MODAL ============ */
 function modal(titulo, campos, ok){
-  $('#modal').innerHTML = `<h3>${titulo}</h3>` + campos.map(c => `<div class="campo"><label>${c.l}</label><input data-k="${c.k}" type="${c.t||'text'}" placeholder="${c.p||''}"></div>`).join('') +
+  $('#modal').innerHTML = `<h3>${titulo}</h3>` + campos.map(c => `<div class="campo"><label>${c.l}</label><input data-k="${c.k}" type="${c.t||'text'}" placeholder="${c.p||''}" value="${esc(c.v||'')}"></div>`).join('') +
     `<div class="acc"><button class="btn sec" id="mNo">Cancelar</button><button class="btn" id="mOk">Guardar</button></div>`;
   $('#fm').classList.add('abierto');
   $('#mNo').onclick = () => $('#fm').classList.remove('abierto');
   $('#mOk').onclick = async () => {
     const v = {}; document.querySelectorAll('#modal [data-k]').forEach(i => v[i.dataset.k] = i.value.trim());
-    if(campos.some(c => !v[c.k])) return toast('Completá todos los campos');
+    if(campos.some(c => !c.opt && !v[c.k])) return toast('Completá todos los campos');
     if(await ok(v)) $('#fm').classList.remove('abierto');
   };
 }
@@ -155,14 +155,14 @@ const vistas = {
     <div class="card tabla">${usuarios.length ? `<table><thead><tr><th>Socio</th><th>Email</th><th>Cuota</th><th>Estado</th><th></th></tr></thead><tbody>${
       usuarios.map(u=>`<tr><td><span class="on-dot ${u.online?'si':''}"></span>${esc(u.nombre)} ${esc(u.apellido)}</td>
       <td>${esc(u.email)}</td><td>${u.monto!=null?$$(u.monto):'—'}</td><td>${tag(estado(u))}</td>
-      <td style="text-align:right"><button class="btn x" data-del="${u.id}">Quitar</button></td></tr>`).join('')}</tbody></table>` : vacio('No hay socios activos.')}</div>`;
+      <td style="text-align:right"><button class="btn x e" data-edit="${u.id}">Modificar</button><button class="btn x" data-del="${u.id}">Quitar</button></td></tr>`).join('')}</tbody></table>` : vacio('No hay socios activos.')}</div>`;
   },
   entrenadores(){
     return `<div class="barra"><div><h2>Entrenadores</h2><p class="sub" style="margin:0">Equipo del gimnasio</p></div><button class="btn" id="addE">+ Agregar entrenador</button></div>
     <div class="card tabla">${entrenadores.length ? `<table><thead><tr><th>Nombre</th><th>Email</th><th>Estado</th><th></th></tr></thead><tbody>${
       entrenadores.map(e=>`<tr><td>${esc(e.nombre)} ${esc(e.apellido)}</td><td>${esc(e.email)}</td>
       <td><span class="on-dot ${e.online?'si':''}"></span>${e.online?'En línea':'Desconectado'}</td>
-      <td style="text-align:right"><button class="btn x" data-delE="${e.id}">Quitar</button></td></tr>`).join('')}</tbody></table>` : vacio('No hay entrenadores activos.')}</div>`;
+      <td style="text-align:right"><button class="btn x e" data-edite="${e.id}">Modificar</button><button class="btn x" data-delE="${e.id}">Quitar</button></td></tr>`).join('')}</tbody></table>` : vacio('No hay entrenadores activos.')}</div>`;
   },
   rutinas(){
     const r = rutinas.find(x=>x.id==rutinaSel);
@@ -194,6 +194,11 @@ const pedirPersona = (rol, titulo) => modal(titulo, [
   {k:'nombre',l:'Nombre'},{k:'apellido',l:'Apellido'},{k:'cedula',l:'Cédula'},
   {k:'email',l:'Email',t:'email'},{k:'contrasena',l:'Contraseña',t:'password'}], v => accion('crear_persona', {...v, rol}));
 
+const editarPersona = (p, titulo) => modal(titulo, [
+  {k:'nombre',l:'Nombre',v:p.nombre},{k:'apellido',l:'Apellido',v:p.apellido},{k:'cedula',l:'Cédula',v:p.cedula},
+  {k:'email',l:'Email',t:'email',v:p.email},{k:'contrasena',l:'Nueva contraseña (opcional)',t:'password',p:'Dejar vacío para no cambiarla',opt:true}],
+  v => accion('editar_persona', {...v, id:p.id}));
+
 document.addEventListener('click', e => {
   const t = e.target.closest('button'); const d = t ? t.dataset : {};
   if(!e.target.closest('.perfil')) $('#menu').classList.remove('abierto');
@@ -203,6 +208,8 @@ document.addEventListener('click', e => {
   if(d.del){ if(confirm('¿Quitar este usuario?')) accion('quitar_persona', {id:+d.del}); return; }
   if(d.delE){ if(confirm('¿Quitar este entrenador?')) accion('quitar_persona', {id:+d.delE}); return; }
   if(d.delEj){ accion('quitar_ejercicio', {rutina_id:rutinaSel, ejercicio_id:+d.delEj}); return; }
+  if(d.edit) return editarPersona(usuarios.find(x=>x.id==d.edit), 'Modificar usuario');
+  if(d.edite) return editarPersona(entrenadores.find(x=>x.id==d.edite), 'Modificar entrenador');
   if(t.id==='addU') return pedirPersona('Socio','Nuevo usuario');
   if(t.id==='addE') return pedirPersona('Entrenador','Nuevo entrenador');
   if(t.id==='addEj') return modal('Nuevo ejercicio',[{k:'nombre',l:'Ejercicio'},{k:'series',l:'Series',t:'number',p:'4'},{k:'repeticiones',l:'Repeticiones',t:'number',p:'10'}],

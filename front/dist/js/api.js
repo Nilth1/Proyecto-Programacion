@@ -79,10 +79,16 @@ const API = {
         return await this.request('/socio.php?accion=todo');
     },
 
+    /** Estado del estacionamiento (solo planes Pro y Premium) */
+    async socioParking() {
+        return await this.request('/socio.php?accion=parking');
+    },
+
     /**
      * Ejecuta una acción del socio:
      * anotar_clase | cancelar_clase | escribir_queja | borrar_queja |
-     * comprar_plan | guardar_objetivo | elegir_entrenador
+     * comprar_plan | guardar_objetivo | elegir_entrenador |
+     * parking_reservar | parking_cancelar
      */
     async socioAccion(accion, datos = {}) {
         return await this.request('/socio.php?accion=' + accion, 'POST', datos);

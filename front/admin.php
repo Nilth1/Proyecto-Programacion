@@ -36,7 +36,7 @@ try {
         $admin->execute([$_SESSION['id']]);
 
         $personas = function ($rol) use ($pdo) {
-            $s = $pdo->prepare("SELECT u.id, u.nombre, u.apellido, u.email,
+            $s = $pdo->prepare("SELECT u.id, u.nombre, u.apellido, u.cedula, u.email,
                     (u.ultima_actividad >= NOW() - INTERVAL 5 MINUTE) AS online,
                     (SELECT c.estado FROM cuotas c WHERE c.usuario_id = u.id ORDER BY c.fecha_vencimiento DESC, c.id DESC LIMIT 1) AS cuota,
                     (SELECT c.monto  FROM cuotas c WHERE c.usuario_id = u.id ORDER BY c.fecha_vencimiento DESC, c.id DESC LIMIT 1) AS monto
@@ -86,6 +86,25 @@ try {
                 ->execute([trim($in['nombre']), trim($in['apellido']), trim($in['cedula']), $rol, trim($in['email']), password_hash($in['contrasena'], PASSWORD_DEFAULT)]);
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) out(['status' => 'error', 'message' => 'Esa cédula o email ya existe'], 409);
+            throw $e;
+        }
+        out(['status' => 'success']);
+
+    case 'editar_persona':
+        // Edita nombre, apellido, cédula, email y (opcional) contraseña de un socio o entrenador
+        $id = (int)($in['id'] ?? 0);
+        foreach (['nombre', 'apellido', 'cedula', 'email'] as $k)
+            if (trim($in[$k] ?? '') === '') out(['status' => 'error', 'message' => 'Completá nombre, apellido, cédula y email'], 400);
+        if (!filter_var($in['email'], FILTER_VALIDATE_EMAIL)) out(['status' => 'error', 'message' => 'Email inválido'], 400);
+        $sql = "UPDATE user SET nombre = ?, apellido = ?, cedula = ?, email = ?";
+        $par = [trim($in['nombre']), trim($in['apellido']), trim($in['cedula']), trim($in['email'])];
+        if (trim($in['contrasena'] ?? '') !== '') { $sql .= ", contrasena = ?"; $par[] = password_hash($in['contrasena'], PASSWORD_DEFAULT); }
+        $sql .= " WHERE id = ? AND LOWER(rol) IN ('socio','entrenador')";
+        $par[] = $id;
+        try {
+            $pdo->prepare($sql)->execute($par);
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) out(['status' => 'error', 'message' => 'Esa cédula o email ya la usa otra persona'], 409);
             throw $e;
         }
         out(['status' => 'success']);

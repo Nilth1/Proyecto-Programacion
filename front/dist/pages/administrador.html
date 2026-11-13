@@ -2,6 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<!-- Traducción (i18n): va primero para que fechas y textos salgan en el idioma elegido -->
+<script src="../js/i18n/en.js"></script>
+<script src="../js/i18n.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Administrador - FitPower</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -87,6 +90,7 @@ tr.baja td{opacity:.45}
 <div id="toast"></div>
 
 <script src="../js/api.js"></script>
+<script src="../js/gifs.js"></script>
 <script>
 /* ============ ESTADO (viene de la base de datos vía admin.php) ============ */
 let usuarios = [], entrenadores = [], rutinas = [], fin = {meses:[],pendiente:0,vencida:0};
@@ -170,7 +174,7 @@ const vistas = {
     return `<h2>Rutinas</h2><p class="sub">Gestioná los ejercicios de cada rutina</p>
     <div class="dosc"><div class="card lista">${rutinas.map(x=>`<button class="${x.id==r.id?'on':''}" data-r="${x.id}">${esc(x.nombre)}</button>`).join('')}</div>
     <div class="card"><div class="barra"><strong style="font-size:16px">${esc(r.nombre)}</strong><button class="btn" id="addEj">+ Agregar ejercicio</button></div>
-      ${r.ej.length ? r.ej.map((x,i)=>`<div class="ej"><span class="n">${i+1}</span><div>${esc(x.n)}<br><small>${esc(x.s)}</small></div><button class="btn x" data-delEj="${x.id}">Eliminar</button></div>`).join('') : '<p class="sub">Sin ejercicios todavía.</p>'}</div></div>`;
+      ${r.ej.length ? r.ej.map((x,i)=>`<div class="ej" data-gif="${esc(x.n)}" data-gif-src="${esc(x.g||'')}"><span class="n">${i+1}</span><div>${esc(x.n)}<span class="gif-ico">▶</span><br><small>${esc(x.s)}</small></div><button class="btn x" data-delEj="${x.id}">Eliminar</button></div>`).join('') : '<p class="sub">Sin ejercicios todavía.</p>'}</div></div>`;
   },
   finanzas(){
     const s = fin.meses, max = Math.max(...s.map(x=>x.v),1), actual = s.length ? s[s.length-1].v : 0;

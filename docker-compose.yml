@@ -4,6 +4,9 @@ services:
   app:
     build: .
     container_name: proyecto_app
+    # Le pasa al contenedor las variables del .env (DB_HOST, DB_USER, etc.)
+    env_file:
+      - .env
     ports:
       - "8080:80"
     volumes:
@@ -16,11 +19,13 @@ services:
     image: mysql:8.0
     container_name: proyecto_db
     restart: always
+    # Todo en UTF-8 para que las tildes y la ñ se guarden bien
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: fitpowerbd
-      MYSQL_USER: usuario
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:

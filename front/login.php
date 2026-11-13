@@ -2,14 +2,14 @@
 session_start();
 header('Content-Type: application/json');
 
-// Configuración correcta según tu docker-compose.yml
-$host     = 'db';
-$dbname   = 'fitpowerbd';
-$dbuser   = 'root';
-$dbpass   = 'root_password';
+// Datos de conexión: vienen del archivo .env (docker-compose se los pasa al contenedor)
+$host     = getenv('DB_HOST');
+$dbname   = getenv('DB_NAME');
+$dbuser   = getenv('DB_USER');
+$dbpass   = getenv('DB_PASSWORD');
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $dbuser, $dbpass);
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     http_response_code(500);

@@ -2,6 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<!-- Traducción (i18n): va primero para que fechas y textos salgan en el idioma elegido -->
+<script src="../js/i18n/en.js"></script>
+<script src="../js/i18n.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Entrenador - FitPower</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,6 +83,11 @@ tr.baja td{opacity:.45}
 .asig{display:flex;gap:8px;margin-top:10px}.asig .sel{flex:1}
 .nota{font-size:12px;color:var(--gris);margin:8px 0 0}
 .btn[disabled]{opacity:.45;cursor:default;filter:none}
+.gif-adj{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.gif-prev{display:flex;align-items:center;gap:12px;background:var(--caja2);border:1px solid var(--borde);border-radius:12px;padding:8px 10px 8px 8px}
+.gif-prev img{width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px}
+.gif-prev small{color:var(--gris);display:block;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gif-tag{font-size:9px;font-weight:800;letter-spacing:.5px;color:var(--azul);background:var(--azul-s);padding:3px 7px;border-radius:999px;margin-left:8px;vertical-align:middle}
 @media(max-width:760px){.slot{grid-template-columns:1fr 70px 70px 34px}}
 </style>
 </head>
@@ -100,9 +108,12 @@ tr.baja td{opacity:.45}
 <div id="toast"></div>
 
 <script src="../js/api.js"></script>
+<script src="../js/gifs.js"></script>
 <script>
 let D = null, tab = 'alumnos', verTodos = false;
 let nomRutina = '', slots = [{id:'',series:3,reps:10}];   // estado del formulario "Crear rutina"
+let gifNuevo = null;   // GIF adjuntado en "Agregar ejercicio": {data: 'data:image/gif;base64,...', nombre, kb}
+const GIF_MAX_MB = 3;
 
 const $ = s => document.querySelector(s);
 const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -150,7 +161,7 @@ const vistas = {
       <div class="acc" style="justify-content:space-between"><button class="btn sec" id="addSlot" ${D.ejercicios.length?'':'disabled'}>+ Agregar slot</button><button class="btn" id="guardarR">Crear rutina</button></div>
       <p class="nota">${D.ejercicios.length ? 'La dificultad y el grupo muscular se calculan solos según los ejercicios elegidos.' : 'Primero creá ejercicios en la pestaña Ejercicios.'}</p></div>
     <div class="card">${D.rutinas.length ? D.rutinas.map(r=>`<div class="fila"><div><strong>${esc(r.nombre)}</strong> <span class="rec" style="margin-left:6px">${esc(r.dificultad)} · ${esc(r.grupo_muscular)}</span><br>
-      <small>${r.ej.map(x=>esc(x.n)+' ('+esc(x.s)+')').join(' · ') || 'Sin ejercicios'}</small></div><button class="btn x" data-delr="${r.id}">Borrar</button></div>`).join('') : vacio('Todavía no hay rutinas.')}</div>`;
+      <small>${r.ej.map(x=>`<span data-gif="${esc(x.n)}" data-gif-src="${esc(x.g||'')}">${esc(x.n)}</span> (${esc(x.s)})`).join(' · ') || 'Sin ejercicios'}</small></div><button class="btn x" data-delr="${r.id}">Borrar</button></div>`).join('') : vacio('Todavía no hay rutinas.')}</div>`;
   },
   ejercicios(){
     return `<h2>Ejercicios</h2><p class="sub">Creá los ejercicios que después usás en las rutinas</p>
@@ -160,11 +171,17 @@ const vistas = {
       <div class="campo"><label>Tipo de ejercicio</label><input class="txt" id="eTipo" list="tipos" placeholder="Fuerza"></div>
       <div class="campo"><label>Dificultad</label><select class="sel" id="eDif"><option>Principiante</option><option selected>Intermedio</option><option>Avanzado</option></select></div></div>
       <div class="campo"><label>Descripción (opcional)</label><input class="txt" id="eInfo" placeholder="Cómo se hace, consejos..."></div>
+      <div class="campo"><label>GIF del ejercicio (opcional)</label>
+        <div class="gif-adj"><input type="file" id="eGif" accept="image/gif,.gif" hidden>
+          ${gifNuevo ? `<div class="gif-prev"><img src="${gifNuevo.data}" alt="GIF adjuntado"><div><strong>GIF listo</strong><small>${esc(gifNuevo.nombre)} · ${gifNuevo.kb} KB</small></div>
+            <button class="btn x" id="quitarGif" title="Quitar GIF">×</button></div>` : ''}
+          <button class="btn sec" id="adjGif">📎 ${gifNuevo ? 'Cambiar GIF' : 'Adjuntar GIF'}</button></div>
+        <p class="nota">Si no adjuntás uno, se busca un GIF automático por el nombre. Máximo ${GIF_MAX_MB} MB.</p></div>
       <datalist id="grupos"><option>Pecho</option><option>Espalda</option><option>Pierna</option><option>Glúteos</option><option>Hombros</option><option>Bíceps</option><option>Tríceps</option><option>Core</option><option>Cardio</option><option>Movilidad</option></datalist>
       <datalist id="tipos"><option>Fuerza</option><option>Cardio</option><option>Isometría</option><option>Movilidad</option><option>Rehabilitación</option></datalist>
       <div class="acc"><button class="btn" id="guardarE">Agregar ejercicio</button></div></div>
     <div class="card tabla">${D.ejercicios.length ? `<table><thead><tr><th>Ejercicio</th><th>Grupo</th><th>Tipo</th><th>Dificultad</th><th>En rutinas</th><th></th></tr></thead><tbody>${
-      D.ejercicios.map(e=>`<tr><td>${esc(e.nombre)}</td><td>${esc(e.grupo_muscular)}</td><td>${esc(e.tipo_ejercicio)}</td><td>${esc(e.dificultad)}</td><td>${e.usado}</td>
+      D.ejercicios.map(e=>`<tr><td data-gif="${esc(e.nombre)}" data-gif-src="${esc(e.gif||'')}">${esc(e.nombre)}<span class="gif-ico">▶</span>${e.gif?'<span class="gif-tag">GIF PROPIO</span>':''}</td><td>${esc(e.grupo_muscular)}</td><td>${esc(e.tipo_ejercicio)}</td><td>${esc(e.dificultad)}</td><td>${e.usado}</td>
       <td style="text-align:right"><button class="btn x" data-dele="${e.id}">Borrar</button></td></tr>`).join('')}</tbody></table>` : vacio('Todavía no hay ejercicios.')}</div>`;
   }
 };
@@ -189,9 +206,36 @@ document.addEventListener('click', async e => {
     if(ok){ nomRutina=''; slots=[{id:'',series:3,reps:10}]; render(); } return;
   }
   if(d.delr){ if(confirm('¿Borrar esta rutina? También se le quita a los socios que la tengan.')) accion('borrar_rutina', {id:+d.delr}); return; }
-  if(t.id==='guardarE') return accion('crear_ejercicio', {nombre:$('#eNombre').value, grupo_muscular:$('#eGrupo').value, tipo_ejercicio:$('#eTipo').value, dificultad:$('#eDif').value, info:$('#eInfo').value}, 'Ejercicio agregado');
+  if(t.id==='adjGif') return $('#eGif').click();   // abre el selector de archivos
+  if(t.id==='quitarGif'){ gifNuevo = null; return pintarGif(); }
+  if(t.id==='guardarE'){
+    t.disabled = true;   // evita crear el ejercicio dos veces si se hace doble click
+    const ok = await accion('crear_ejercicio', {nombre:$('#eNombre').value, grupo_muscular:$('#eGrupo').value, tipo_ejercicio:$('#eTipo').value, dificultad:$('#eDif').value, info:$('#eInfo').value, gif: gifNuevo ? gifNuevo.data : null}, 'Ejercicio agregado');
+    if(ok){ gifNuevo = null; render(); } else t.disabled = false;
+    return;
+  }
   if(d.dele){ if(confirm('¿Borrar este ejercicio?')) accion('borrar_ejercicio', {id:+d.dele}); return; }
 });
+// Cuando eligen un archivo en "Adjuntar GIF": se valida y se lee como texto (base64) para mandarlo en el JSON
+document.addEventListener('change', e => {
+  if(e.target.id !== 'eGif') return;
+  const f = e.target.files[0]; e.target.value = '';
+  if(!f) return;
+  if(f.type !== 'image/gif' && !/\.gif$/i.test(f.name)) return toast('Tiene que ser un archivo .gif');
+  if(f.size > GIF_MAX_MB*1024*1024) return toast(`El GIF pesa más de ${GIF_MAX_MB} MB`);
+  const lector = new FileReader();
+  lector.onload = () => { gifNuevo = {data: String(lector.result).replace(/^data:[^;]*;/, 'data:image/gif;'), nombre: f.name, kb: Math.max(1, Math.round(f.size/1024))}; pintarGif(); };
+  lector.onerror = () => toast('No se pudo leer el archivo');
+  lector.readAsDataURL(f);
+});
+// Re-dibuja la pestaña sin borrar lo que ya escribieron en el formulario de ejercicio
+function pintarGif(){
+  const ids = ['eNombre','eGrupo','eTipo','eDif','eInfo'], v = {};
+  ids.forEach(i => { const el = $('#'+i); if(el) v[i] = el.value; });
+  render();
+  ids.forEach(i => { const el = $('#'+i); if(el && v[i] !== undefined) el.value = v[i]; });
+}
+
 // Mantener el estado del formulario de rutina mientras se escribe
 document.addEventListener('input', e => {
   const el = e.target, d = el.dataset;

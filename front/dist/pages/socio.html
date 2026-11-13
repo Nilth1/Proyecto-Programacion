@@ -2,6 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<!-- Traducción (i18n): va primero para que fechas y textos salgan en el idioma elegido -->
+<script src="../js/i18n/en.js"></script>
+<script src="../js/i18n.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Socio - FitPower</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -196,6 +199,7 @@ textarea:focus{outline:0;border-color:var(--azul)}
 <div id="toast"></div>
 
 <script src="../js/api.js"></script>
+<script src="../js/gifs.js"></script>
 <script>
 let D = null, tab = 'rutinas', rutinaSel = null, verTodos = false;
 
@@ -231,7 +235,7 @@ const vistas = {
     return `<h2>Rutinas</h2><p class="sub">Rutinas que te asignó tu entrenador</p>
     <div class="dosc"><div class="card lista">${D.rutinas.map(x=>`<button class="${x.id==r.id?'on':''}" data-r="${x.id}">${esc(x.nombre)}</button>`).join('')}</div>
     <div class="card"><div class="barra"><strong style="font-size:16px">${esc(r.nombre)}</strong><span class="tag t-paga" style="color:var(--azul);background:var(--azul-s)">${esc(r.dificultad)} · ${esc(r.grupo_muscular)}</span></div>
-    ${r.ej.length ? r.ej.map((x,i)=>`<div class="ej"><span class="n">${i+1}</span><div>${esc(x.n)}<br><small>${esc(x.s)}</small></div></div>`).join('') : '<p class="sub">Esta rutina todavía no tiene ejercicios.</p>'}</div></div>`;
+    ${r.ej.length ? r.ej.map((x,i)=>`<div class="ej" data-gif="${esc(x.n)}" data-gif-src="${esc(x.g||'')}"><span class="n">${i+1}</span><div>${esc(x.n)}<span class="gif-ico">▶</span><br><small>${esc(x.s)}</small></div></div>`).join('') : '<p class="sub">Esta rutina todavía no tiene ejercicios.</p>'}</div></div>`;
   },
   clases(){
     return `<h2>Clases</h2><p class="sub">Anotate en las próximas clases</p>
@@ -421,9 +425,9 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('keydown', e => { if(e.key==='Escape' && pago) cerrarPago(); });
 
-/* ============ ESTACIONAMIENTO (solo planes Pro y Premium) ============ */
+/* ============ ESTACIONAMIENTO (solo planes Elite y Power) ============ */
 let P = null, PK_T = 0;
-const puedeParking = () => !!D && ['Pro','Premium'].includes((D.planes.find(p => p.id == D.yo.id_plan) || {}).nombre);
+const puedeParking = () => !!D && ['Elite','Power'].includes((D.planes.find(p => p.id == D.yo.id_plan) || {}).nombre);
 const CORONA = '<svg class="cr" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/></svg>';
 const restante = m => m >= 60 ? `${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m` : `${Math.max(m,1)} min`;
 async function cargarParking(){
@@ -446,7 +450,7 @@ vistas.parking = function(){
     const cls = 'pk-lugar' + (prem?' prem':'') + (l.estado==='mio'?' mio':'') + (l.estado==='ocupado'?' ocup':'') + (bloq && l.estado==='libre'?' lock':'');
     const btn = l.estado==='mio' ? `<button class="pk-btn" data-pcancel="1">Cancelar</button>`
       : l.estado==='ocupado' ? `<button class="pk-btn" disabled>Ocupado</button>`
-      : bloq ? `<button class="pk-btn" disabled>Solo Premium</button>`
+      : bloq ? `<button class="pk-btn" disabled>Solo Power</button>`
       : `<button class="pk-btn" data-plugar="${l.n}">Reservar</button>`;
     return `<div class="${cls}"><span class="pk-n">${String(l.n).padStart(2,'0')}</span>${l.estado==='mio'?`<span class="pk-rest">${restante(l.rest)}</span>`:''}${prem?CORONA:'<span class="pk-p">P</span>'}${btn}</div>`;
   }).join('');
@@ -457,12 +461,12 @@ vistas.parking = function(){
       <div class="pk-bar"><i style="width:${Math.round(P.libres/P.total*100)}%"></i></div></div>
       <div class="pk-sub">Ocupación ${nivel} · Nivel 01</div></div>
     <div class="pk-res"><div><div class="pk-lbl">Resumen de lugares</div>
-      <div class="pk-cols"><div><b>${String(P.libres_pro).padStart(2,'0')}</b><small><i></i>Pro libres</small></div><div><b class="az">${String(P.libres_premium).padStart(2,'0')}</b><small><i class="az"></i>Premium libres</small></div></div></div>
+      <div class="pk-cols"><div><b>${String(P.libres_pro).padStart(2,'0')}</b><small><i></i>Elite libres</small></div><div><b class="az">${String(P.libres_premium).padStart(2,'0')}</b><small><i class="az"></i>Power libres</small></div></div></div>
       <div class="pk-act">Actualizado hace ${act}</div></div>
   </div>
   <div class="pk-lote"><div class="pk-lh"><div><strong>Nivel 01</strong><small>Seleccioná tu lugar al ingresar</small></div><span class="pk-zona">ZONA A</span></div>
     <div class="pk-grid">${celdas}</div><div class="pk-ent">ENTRADA</div></div>
-  <p class="pk-nota">Los lugares 21 a 25 son exclusivos del plan Premium. La reserva vence sola a las 4 horas.</p>`;
+  <p class="pk-nota">Los lugares 21 a 25 son exclusivos del plan Power. La reserva vence sola a las 4 horas.</p>`;
 };
 
 $('#avatar').onclick = () => $('#menu').classList.toggle('abierto');

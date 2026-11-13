@@ -6,7 +6,7 @@ header('Content-Type: application/json; charset=utf-8');
 function out($d, $c = 200) { http_response_code($c); echo json_encode($d); exit; }
 
 try {
-    $pdo = new PDO("mysql:host=db;dbname=fitpowerbd;charset=utf8mb4", 'root', 'root_password');
+    $pdo = new PDO("mysql:host=" . getenv('DB_HOST') . ";dbname=" . getenv('DB_NAME') . ";charset=utf8mb4", getenv('DB_USER'), getenv('DB_PASSWORD'));
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     out(['status' => 'error', 'message' => 'Error de conexión a la BD'], 500);
@@ -20,6 +20,35 @@ $accion = $_GET['accion'] ?? '';
 $in = json_decode(file_get_contents('php://input'), true) ?? [];
 $NIVEL = ['Principiante' => 1, 'Intermedio' => 2, 'Avanzado' => 3];
 
+// ---- GIFs propios de los ejercicios ----
+// Se guardan en front/dist/assets/gifs/ y en la BD (ejercicios.media_ejercicio) queda la ruta web: "dist/assets/gifs/xxx.gif"
+const GIF_MAX_BYTES = 3 * 1024 * 1024;   // 3 MB
+const GIF_CARPETA = __DIR__ . '/dist/assets/gifs';
+const GIF_RUTA_WEB = 'dist/assets/gifs';
+
+// Recibe el GIF como "data URL" (data:image/gif;base64,....), lo valida y lo guarda. Devuelve la ruta web.
+function guardarGif($dataUrl) {
+    if (!preg_match('#^data:image/gif;base64,(.+)$#s', $dataUrl, $m))
+        out(['status' => 'error', 'message' => 'El archivo tiene que ser un GIF'], 400);
+    $bin = base64_decode($m[1], true);
+    if ($bin === false) out(['status' => 'error', 'message' => 'El GIF llegó roto, probá de nuevo'], 400);
+    if (strlen($bin) > GIF_MAX_BYTES) out(['status' => 'error', 'message' => 'El GIF pesa más de 3 MB'], 400);
+    // Los GIF de verdad siempre empiezan con "GIF87a" o "GIF89a" (no alcanza con que el nombre termine en .gif)
+    if (!in_array(substr($bin, 0, 6), ['GIF87a', 'GIF89a'], true))
+        out(['status' => 'error', 'message' => 'Ese archivo no es un GIF válido'], 400);
+    if (!is_dir(GIF_CARPETA) && !@mkdir(GIF_CARPETA, 0777, true))
+        out(['status' => 'error', 'message' => 'No se pudo crear la carpeta de GIFs en el servidor'], 500);
+    $nombre = 'ej_' . bin2hex(random_bytes(8)) . '.gif';   // nombre al azar: no se pisan ni se pueden adivinar
+    if (@file_put_contents(GIF_CARPETA . '/' . $nombre, $bin) === false)
+        out(['status' => 'error', 'message' => 'No se pudo guardar el GIF en el servidor'], 500);
+    return GIF_RUTA_WEB . '/' . $nombre;
+}
+
+// Borra el archivo de un GIF propio (solo si está dentro de la carpeta de GIFs)
+function borrarGif($ruta) {
+    if ($ruta && preg_match('#^' . GIF_RUTA_WEB . '/ej_[0-9a-f]{16}\.gif$#', $ruta)) @unlink(__DIR__ . '/' . $ruta);
+}
+
 try {
     $pdo->prepare("UPDATE user SET ultima_actividad = NOW() WHERE id = ?")->execute([$uid]);
     $q = function ($sql, $p = []) use ($pdo) { $s = $pdo->prepare($sql); $s->execute($p); return $s->fetchAll(PDO::FETCH_ASSOC); };
@@ -29,16 +58,16 @@ try {
     case 'todo':
         $yo = $q("SELECT nombre, apellido, especialidad FROM user WHERE id = ?", [$uid])[0];
 
-        $ejercicios = $q("SELECT e.id, e.nombre, e.grupo_muscular, e.tipo_ejercicio, e.dificultad, e.info_ejercicio AS info,
+        $ejercicios = $q("SELECT e.id, e.nombre, e.grupo_muscular, e.tipo_ejercicio, e.dificultad, e.info_ejercicio AS info, e.media_ejercicio AS gif,
                             (SELECT COUNT(*) FROM rutina_ejercicio re WHERE re.id_ejercicio = e.id) AS usado
                           FROM ejercicios e ORDER BY e.nombre");
 
         $rutinas = $q("SELECT id, nombre, dificultad, grupo_muscular FROM rutinas ORDER BY id DESC");
-        $ej = $q("SELECT re.id_rutina, e.nombre, COALESCE(re.series, e.series) AS series, COALESCE(re.repeticiones, e.repeticiones) AS reps
+        $ej = $q("SELECT re.id_rutina, e.nombre, e.media_ejercicio AS gif, COALESCE(re.series, e.series) AS series, COALESCE(re.repeticiones, e.repeticiones) AS reps
                   FROM rutina_ejercicio re JOIN ejercicios e ON e.id = re.id_ejercicio ORDER BY re.id_rutina, re.orden");
         foreach ($rutinas as &$r) {
             $r['ej'] = [];
-            foreach ($ej as $x) if ($x['id_rutina'] == $r['id']) $r['ej'][] = ['n' => $x['nombre'], 's' => $x['series'] . ' x ' . $x['reps']];
+            foreach ($ej as $x) if ($x['id_rutina'] == $r['id']) $r['ej'][] = ['n' => $x['nombre'], 's' => $x['series'] . ' x ' . $x['reps'], 'g' => $x['gif']];
         }
         unset($r);
 
@@ -59,16 +88,26 @@ try {
         $n = trim($in['nombre'] ?? ''); $g = trim($in['grupo_muscular'] ?? ''); $t = trim($in['tipo_ejercicio'] ?? '');
         $d = $in['dificultad'] ?? '';
         if ($n === '' || $g === '' || $t === '' || !isset($NIVEL[$d])) out(['status' => 'error', 'message' => 'Completá nombre, grupo, tipo y dificultad'], 400);
+        // GIF opcional: se valida y se guarda antes de tocar la BD
+        $gif = !empty($in['gif']) ? guardarGif($in['gif']) : null;
         // repeticiones y series de acá son valores por defecto: los reales se eligen al armar cada rutina
-        $pdo->prepare("INSERT INTO ejercicios (nombre, repeticiones, series, dificultad, grupo_muscular, tipo_ejercicio, info_ejercicio) VALUES (?, 10, 3, ?, ?, ?, ?)")
-            ->execute([$n, $d, $g, $t, trim($in['info'] ?? '') ?: null]);
+        try {
+            $pdo->prepare("INSERT INTO ejercicios (nombre, repeticiones, series, dificultad, grupo_muscular, tipo_ejercicio, info_ejercicio, media_ejercicio) VALUES (?, 10, 3, ?, ?, ?, ?, ?)")
+                ->execute([$n, $d, $g, $t, trim($in['info'] ?? '') ?: null, $gif]);
+        } catch (PDOException $e) {
+            borrarGif($gif);   // si falló la BD, no dejamos el archivo huérfano
+            throw $e;
+        }
         out(['status' => 'success']);
 
     case 'borrar_ejercicio':
         $id = (int)($in['id'] ?? 0);
         $s = $pdo->prepare("SELECT COUNT(*) FROM rutina_ejercicio WHERE id_ejercicio = ?"); $s->execute([$id]);
         if ($s->fetchColumn() > 0) out(['status' => 'error', 'message' => 'Ese ejercicio está en una rutina. Borrá la rutina primero'], 409);
+        $s = $pdo->prepare("SELECT media_ejercicio FROM ejercicios WHERE id = ?"); $s->execute([$id]);
+        $gif = $s->fetchColumn();
         $pdo->prepare("DELETE FROM ejercicios WHERE id = ?")->execute([$id]);
+        borrarGif($gif);
         out(['status' => 'success']);
 
     case 'crear_rutina':
@@ -127,5 +166,5 @@ try {
 } catch (PDOException $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
     error_log('entrenador.php: ' . $e->getMessage());
-    out(['status' => 'error', 'message' => 'Error en la base de datos. ¿Corriste migracion_entrenador.sql?'], 500);
+    out(['status' => 'error', 'message' => 'Error en la base de datos'], 500);
 }

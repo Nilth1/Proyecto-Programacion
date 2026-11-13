@@ -6,7 +6,7 @@ header('Content-Type: application/json; charset=utf-8');
 function out($d, $c = 200) { http_response_code($c); echo json_encode($d); exit; }
 
 try {
-    $pdo = new PDO("mysql:host=db;dbname=fitpowerbd;charset=utf8mb4", 'root', 'root_password');
+    $pdo = new PDO("mysql:host=" . getenv('DB_HOST') . ";dbname=" . getenv('DB_NAME') . ";charset=utf8mb4", getenv('DB_USER'), getenv('DB_PASSWORD'));
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     out(['status' => 'error', 'message' => 'Error de conexión a la BD'], 500);
@@ -19,14 +19,14 @@ $uid = (int)$_SESSION['id'];
 $accion = $_GET['accion'] ?? '';
 $in = json_decode(file_get_contents('php://input'), true) ?? [];
 const MAX_ALUMNOS = 15;
-const PARKING_TOTAL = 25;   // lugares 01-20: plan Pro · 21-25: solo Premium
+const PARKING_TOTAL = 25;   // lugares 01-20: planes Elite y Power · 21-25: solo Power
 const PARKING_PRO = 20;
 const PARKING_HORAS = 4;    // la reserva vence sola
 function planParking($pdo, $uid) {
     $s = $pdo->prepare("SELECT p.nombre FROM user u JOIN planes p ON p.id = u.id_plan WHERE u.id = ?");
     $s->execute([$uid]);
     $n = $s->fetchColumn();
-    return in_array($n, ['Pro', 'Premium'], true) ? $n : null;   // el plan Básico no tiene acceso
+    return in_array($n, ['Elite', 'Power'], true) ? $n : null;   // el plan Basic no tiene acceso
 }
 const OBJETIVOS = ['Perder peso', 'Ganar masa muscular', 'Tonificar', 'Resistencia y cardio', 'Rehabilitación'];
 
@@ -39,14 +39,15 @@ try {
         $q = function ($sql, $p = []) use ($pdo) { $s = $pdo->prepare($sql); $s->execute($p); return $s->fetchAll(PDO::FETCH_ASSOC); };
 
         $yo = $q("SELECT nombre, apellido, objetivo, id_entrenador, id_plan FROM user WHERE id = ?", [$uid])[0];
-        $cuota = $q("SELECT id, estado, monto, fecha_vencimiento, pago_mostrador FROM cuotas WHERE usuario_id = ? ORDER BY fecha_vencimiento DESC, id DESC LIMIT 1", [$uid])[0] ?? null;
+        // Cuota a mostrar: primero lo que se debe (Vencida, después Pendiente) y si no debe nada, la última pagada
+        $cuota = $q("SELECT id, estado, monto, fecha_vencimiento, pago_mostrador FROM cuotas WHERE usuario_id = ? ORDER BY estado = 'Pagada', estado = 'Pendiente', id DESC LIMIT 1", [$uid])[0] ?? null;
 
         $rutinas = $q("SELECT r.id, r.nombre, r.dificultad, r.grupo_muscular FROM rutinas r JOIN rutina_asignada a ON a.id_rutina = r.id WHERE a.id_user = ? ORDER BY a.fecha DESC", [$uid]);
-        $ej = $q("SELECT re.id_rutina, e.nombre, COALESCE(re.series, e.series) AS series, COALESCE(re.repeticiones, e.repeticiones) AS reps
+        $ej = $q("SELECT re.id_rutina, e.nombre, e.media_ejercicio AS gif, COALESCE(re.series, e.series) AS series, COALESCE(re.repeticiones, e.repeticiones) AS reps
                   FROM rutina_ejercicio re JOIN ejercicios e ON e.id = re.id_ejercicio ORDER BY re.id_rutina, re.orden");
         foreach ($rutinas as &$r) {
             $r['ej'] = [];
-            foreach ($ej as $x) if ($x['id_rutina'] == $r['id']) $r['ej'][] = ['n' => $x['nombre'], 's' => $x['series'] . ' x ' . $x['reps']];
+            foreach ($ej as $x) if ($x['id_rutina'] == $r['id']) $r['ej'][] = ['n' => $x['nombre'], 's' => $x['series'] . ' x ' . $x['reps'], 'g' => $x['gif']];
         }
         unset($r);
 
@@ -106,8 +107,13 @@ try {
         if ($s->fetchColumn() == $plan['id']) out(['status' => 'error', 'message' => 'Ya tenés este plan'], 409);
         $pdo->beginTransaction();
         $pdo->prepare("UPDATE user SET id_plan = ? WHERE id = ?")->execute([$plan['id'], $uid]);
-        // Se genera la cuota pendiente: aparece en el semáforo y las finanzas del admin
-        $pdo->prepare("INSERT INTO cuotas (usuario_id, monto, fecha_vencimiento, estado) VALUES (?, ?, CURDATE() + INTERVAL 7 DAY, 'Pendiente')")
+        // Se genera la cuota pendiente: aparece en el semáforo y las finanzas del admin.
+        // Si ya tenía una pendiente (por ejemplo, cambió de plan dos veces), se actualiza esa con el precio nuevo en vez de acumular.
+        $s = $pdo->prepare("SELECT id FROM cuotas WHERE usuario_id = ? AND estado = 'Pendiente' ORDER BY fecha_vencimiento DESC, id DESC LIMIT 1");
+        $s->execute([$uid]);
+        $pend = $s->fetchColumn();
+        if ($pend) $pdo->prepare("UPDATE cuotas SET monto = ? WHERE id = ?")->execute([$plan['precio'], $pend]);
+        else $pdo->prepare("INSERT INTO cuotas (usuario_id, monto, fecha_vencimiento, estado) VALUES (?, ?, CURDATE() + INTERVAL 7 DAY, 'Pendiente')")
             ->execute([$uid, $plan['precio']]);
         $pdo->commit();
         out(['status' => 'success']);
@@ -143,7 +149,7 @@ try {
 
     case 'parking':
         $plan = planParking($pdo, $uid);
-        if (!$plan) out(['status' => 'error', 'message' => 'El estacionamiento es solo para planes Pro y Premium'], 403);
+        if (!$plan) out(['status' => 'error', 'message' => 'El estacionamiento es solo para planes Elite y Power'], 403);
         $pdo->exec("DELETE FROM parking_reservas WHERE expira <= NOW()");
         $res = [];
         foreach ($pdo->query("SELECT lugar, id_user, TIMESTAMPDIFF(MINUTE, NOW(), expira) AS rest FROM parking_reservas")->fetchAll(PDO::FETCH_ASSOC) as $r) $res[(int)$r['lugar']] = $r;
@@ -155,15 +161,15 @@ try {
             if ($estado === 'libre') { $libres++; if ($tipo === 'pro') $lp++; else $lpr++; }
             $lugares[] = ['n' => $n, 'tipo' => $tipo, 'estado' => $estado, 'rest' => $estado === 'mio' ? (int)$r['rest'] : null];
         }
-        out(['status' => 'success', 'data' => ['plan' => $plan, 'puede_premium' => $plan === 'Premium', 'total' => PARKING_TOTAL,
+        out(['status' => 'success', 'data' => ['plan' => $plan, 'puede_premium' => $plan === 'Power', 'total' => PARKING_TOTAL,
             'libres' => $libres, 'libres_pro' => $lp, 'libres_premium' => $lpr, 'lugares' => $lugares]]);
 
     case 'parking_reservar':
         $plan = planParking($pdo, $uid);
-        if (!$plan) out(['status' => 'error', 'message' => 'El estacionamiento es solo para planes Pro y Premium'], 403);
+        if (!$plan) out(['status' => 'error', 'message' => 'El estacionamiento es solo para planes Elite y Power'], 403);
         $n = (int)($in['lugar'] ?? 0);
         if ($n < 1 || $n > PARKING_TOTAL) out(['status' => 'error', 'message' => 'Lugar inválido'], 400);
-        if ($n > PARKING_PRO && $plan !== 'Premium') out(['status' => 'error', 'message' => 'Ese lugar es exclusivo del plan Premium'], 403);
+        if ($n > PARKING_PRO && $plan !== 'Power') out(['status' => 'error', 'message' => 'Ese lugar es exclusivo del plan Power'], 403);
         $pdo->beginTransaction();
         $pdo->exec("DELETE FROM parking_reservas WHERE expira <= NOW()");
         $pdo->prepare("DELETE FROM parking_reservas WHERE id_user = ?")->execute([$uid]);   // si ya tenía uno, se cambia
@@ -204,5 +210,5 @@ try {
 } catch (PDOException $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
     error_log('socio.php: ' . $e->getMessage());
-    out(['status' => 'error', 'message' => 'Error en la base de datos. ¿Corriste migracion_socio.sql?'], 500);
+    out(['status' => 'error', 'message' => 'Error en la base de datos'], 500);
 }

@@ -7,7 +7,7 @@ function out($d, $c = 200) { http_response_code($c); echo json_encode($d); exit;
 
 // ---- Conexión (misma que login.php) ----
 try {
-    $pdo = new PDO("mysql:host=db;dbname=fitpowerbd;charset=utf8mb4", 'root', 'root_password');
+    $pdo = new PDO("mysql:host=" . getenv('DB_HOST') . ";dbname=" . getenv('DB_NAME') . ";charset=utf8mb4", getenv('DB_USER'), getenv('DB_PASSWORD'));
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     out(['status' => 'error', 'message' => 'Error de conexión a la BD'], 500);
@@ -38,8 +38,8 @@ try {
         $personas = function ($rol) use ($pdo) {
             $s = $pdo->prepare("SELECT u.id, u.nombre, u.apellido, u.cedula, u.email,
                     (u.ultima_actividad >= NOW() - INTERVAL 5 MINUTE) AS online,
-                    (SELECT c.estado FROM cuotas c WHERE c.usuario_id = u.id ORDER BY c.fecha_vencimiento DESC, c.id DESC LIMIT 1) AS cuota,
-                    (SELECT c.monto  FROM cuotas c WHERE c.usuario_id = u.id ORDER BY c.fecha_vencimiento DESC, c.id DESC LIMIT 1) AS monto
+                    (SELECT c.estado FROM cuotas c WHERE c.usuario_id = u.id ORDER BY c.estado = 'Pagada', c.estado = 'Pendiente', c.id DESC LIMIT 1) AS cuota,
+                    (SELECT c.monto  FROM cuotas c WHERE c.usuario_id = u.id ORDER BY c.estado = 'Pagada', c.estado = 'Pendiente', c.id DESC LIMIT 1) AS monto
                 FROM user u WHERE LOWER(u.rol) = ? AND u.estado = 'Activo' ORDER BY u.nombre");
             $s->execute([$rol]);
             return array_map(function ($r) { $r['online'] = (bool)$r['online']; return $r; }, $s->fetchAll(PDO::FETCH_ASSOC));
@@ -47,12 +47,12 @@ try {
 
         // Rutinas con sus ejercicios
         $rutinas = $pdo->query("SELECT id, nombre FROM rutinas ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
-        $ej = $pdo->query("SELECT re.id_rutina, e.id, e.nombre, COALESCE(re.series, e.series) AS series, COALESCE(re.repeticiones, e.repeticiones) AS reps
+        $ej = $pdo->query("SELECT re.id_rutina, e.id, e.nombre, e.media_ejercicio AS gif, COALESCE(re.series, e.series) AS series, COALESCE(re.repeticiones, e.repeticiones) AS reps
                            FROM rutina_ejercicio re JOIN ejercicios e ON e.id = re.id_ejercicio
                            ORDER BY re.id_rutina, re.orden")->fetchAll(PDO::FETCH_ASSOC);
         foreach ($rutinas as &$r) {
             $r['ej'] = [];
-            foreach ($ej as $x) if ($x['id_rutina'] == $r['id']) $r['ej'][] = ['id' => $x['id'], 'n' => $x['nombre'], 's' => $x['series'] . ' x ' . $x['reps']];
+            foreach ($ej as $x) if ($x['id_rutina'] == $r['id']) $r['ej'][] = ['id' => $x['id'], 'n' => $x['nombre'], 's' => $x['series'] . ' x ' . $x['reps'], 'g' => $x['gif']];
         }
         unset($r);
 
@@ -144,5 +144,5 @@ try {
 } catch (PDOException $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
     error_log('admin.php: ' . $e->getMessage());
-    out(['status' => 'error', 'message' => 'Error en la base de datos. ¿Corriste la migración de ultima_actividad?'], 500);
+    out(['status' => 'error', 'message' => 'Error en la base de datos'], 500);
 }

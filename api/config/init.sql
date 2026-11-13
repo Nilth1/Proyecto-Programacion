@@ -1,3 +1,6 @@
+-- Este archivo está en UTF-8: sin esta línea MySQL lo lee mal y las tildes quedan rotas ("TrÃ­ceps")
+SET NAMES utf8mb4;
+
 -- ========================================================
 -- SCRIPT DE CREACIÓN: SISTEMA DE GESTIÓN FITPOWER
 -- Incluye todos los cambios de los paneles de admin, socio y entrenador
@@ -325,7 +328,7 @@ CREATE TABLE quejas (
 
 -- --------------------------------------------------------
 -- TABLA: parking_reservas
--- Estacionamiento: lugares 01-20 plan Pro, 21-25 solo Premium (definidos en socio.php).
+-- Estacionamiento: lugares 01-20 planes Elite y Power, 21-25 solo Power (definidos en socio.php).
 -- La tabla "parking" original queda sin usar.
 -- --------------------------------------------------------
 
@@ -370,9 +373,9 @@ VALUES
 -- --------------------------------------------------------
 
 INSERT INTO planes (nombre, precio, descripcion) VALUES
-('Básico',  25, 'Acceso a sala de musculación en horario libre'),
-('Pro',     40, 'Sala + clases grupales ilimitadas'),
-('Premium', 60, 'Todo Pro + seguimiento personalizado con entrenador');
+('Basic', 1999, 'Ideal para comenzar: sala de musculación y casillero'),
+('Elite', 2700, 'Sala, funcionales, elegir entrenador, estacionamiento y casillero'),
+('Power', 3500, 'Todo Elite + guía nutricional y estacionamiento privado');
 
 -- --------------------------------------------------------
 -- USUARIOS: administrador, socio y entrenador originales
@@ -423,22 +426,22 @@ UPDATE user SET id_plan = 1 WHERE email = 'sofia@gmail.com';
 
 INSERT INTO cuotas (usuario_id, monto, fecha_pago, fecha_vencimiento, estado) VALUES
 -- Historial de meses anteriores (pagadas)
-((SELECT id FROM user WHERE email='lucas@gmail.com'),  40, CURDATE() - INTERVAL 4 MONTH, CURDATE() - INTERVAL 4 MONTH + INTERVAL 5 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='lucas@gmail.com'),  40, CURDATE() - INTERVAL 3 MONTH, CURDATE() - INTERVAL 3 MONTH + INTERVAL 5 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='lucas@gmail.com'),  40, CURDATE() - INTERVAL 2 MONTH, CURDATE() - INTERVAL 2 MONTH + INTERVAL 5 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='lucas@gmail.com'),  40, CURDATE() - INTERVAL 1 MONTH, CURDATE() - INTERVAL 1 MONTH + INTERVAL 5 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='camila@gmail.com'), 40, CURDATE() - INTERVAL 3 MONTH, CURDATE() - INTERVAL 3 MONTH + INTERVAL 5 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='camila@gmail.com'), 40, CURDATE() - INTERVAL 2 MONTH, CURDATE() - INTERVAL 2 MONTH + INTERVAL 5 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='camila@gmail.com'), 40, CURDATE() - INTERVAL 1 MONTH, CURDATE() - INTERVAL 1 MONTH + INTERVAL 5 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='diego@gmail.com'),  60, CURDATE() - INTERVAL 2 MONTH, CURDATE() - INTERVAL 2 MONTH + INTERVAL 5 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='diego@gmail.com'),  60, CURDATE() - INTERVAL 1 MONTH, CURDATE() - INTERVAL 1 MONTH + INTERVAL 5 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='mateo@gmail.com'),  25, CURDATE() - INTERVAL 1 MONTH, CURDATE() - INTERVAL 1 MONTH + INTERVAL 5 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='lucas@gmail.com'),  2700, CURDATE() - INTERVAL 4 MONTH, CURDATE() - INTERVAL 4 MONTH + INTERVAL 5 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='lucas@gmail.com'),  2700, CURDATE() - INTERVAL 3 MONTH, CURDATE() - INTERVAL 3 MONTH + INTERVAL 5 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='lucas@gmail.com'),  2700, CURDATE() - INTERVAL 2 MONTH, CURDATE() - INTERVAL 2 MONTH + INTERVAL 5 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='lucas@gmail.com'),  2700, CURDATE() - INTERVAL 1 MONTH, CURDATE() - INTERVAL 1 MONTH + INTERVAL 5 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='camila@gmail.com'), 2700, CURDATE() - INTERVAL 3 MONTH, CURDATE() - INTERVAL 3 MONTH + INTERVAL 5 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='camila@gmail.com'), 2700, CURDATE() - INTERVAL 2 MONTH, CURDATE() - INTERVAL 2 MONTH + INTERVAL 5 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='camila@gmail.com'), 2700, CURDATE() - INTERVAL 1 MONTH, CURDATE() - INTERVAL 1 MONTH + INTERVAL 5 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='diego@gmail.com'),  3500, CURDATE() - INTERVAL 2 MONTH, CURDATE() - INTERVAL 2 MONTH + INTERVAL 5 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='diego@gmail.com'),  3500, CURDATE() - INTERVAL 1 MONTH, CURDATE() - INTERVAL 1 MONTH + INTERVAL 5 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='mateo@gmail.com'),  1999, CURDATE() - INTERVAL 1 MONTH, CURDATE() - INTERVAL 1 MONTH + INTERVAL 5 DAY, 'Pagada'),
 -- Cuota del mes actual (define el color del semáforo)
-((SELECT id FROM user WHERE email='lucas@gmail.com'),     40, CURDATE(), CURDATE() + INTERVAL 25 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='camila@gmail.com'),    40, CURDATE(), CURDATE() + INTERVAL 25 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='diego@gmail.com'),     60, CURDATE(), CURDATE() + INTERVAL 25 DAY, 'Pagada'),
-((SELECT id FROM user WHERE email='mateo@gmail.com'),     25, NULL,      CURDATE() + INTERVAL 5 DAY,  'Pendiente'),
-((SELECT id FROM user WHERE email='valentina@gmail.com'), 25, NULL,      CURDATE() - INTERVAL 10 DAY, 'Vencida');
+((SELECT id FROM user WHERE email='lucas@gmail.com'),     2700, CURDATE(), CURDATE() + INTERVAL 25 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='camila@gmail.com'),    2700, CURDATE(), CURDATE() + INTERVAL 25 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='diego@gmail.com'),     3500, CURDATE(), CURDATE() + INTERVAL 25 DAY, 'Pagada'),
+((SELECT id FROM user WHERE email='mateo@gmail.com'),     1999, NULL,      CURDATE() + INTERVAL 5 DAY,  'Pendiente'),
+((SELECT id FROM user WHERE email='valentina@gmail.com'), 1999, NULL,      CURDATE() - INTERVAL 10 DAY, 'Vencida');
 
 -- --------------------------------------------------------
 -- EJERCICIOS

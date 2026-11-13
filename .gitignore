@@ -152,3 +152,6 @@ front/dist/assets/videos/
 *.mp4
 *.mkv
 *.mov
+
+# GIFs que suben los entrenadores desde la app (se crean solos al usarla)
+front/dist/assets/gifs/

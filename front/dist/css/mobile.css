@@ -1,0 +1,33 @@
+/* ==========================================================
+   VISTA MÓVIL
+   Estos estilos solo se aplican en pantallas de menos de 992px,
+   que es cuando Bootstrap cambia el menú por el botón hamburguesa
+   (navbar-expand-lg). En computadora no cambia nada.
+   ========================================================== */
+@media (max-width: 991.98px) {
+
+    /* El header tiene la clase z-3 de Bootstrap (z-index: 3), igual que el
+       contenido del hero, y como el hero viene después en el HTML, sus textos
+       quedaban por encima del menú abierto. Se sube el header a una capa más
+       alta para que el menú se dibuje por encima de todo. */
+    header.z-3 {
+        z-index: 1030 !important;
+    }
+
+    /* Menú desplegable: fondo oscuro para que las opciones se lean
+       sobre la foto del hero (antes era transparente) */
+    .navbar-collapse {
+        background-color: #0b0b0b;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        margin-top: 12px;
+        padding: 8px 16px 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Cada opción ocupa todo el ancho y queda separada por una línea fina */
+    .navbar-collapse .nav-link {
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+}

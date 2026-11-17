@@ -120,6 +120,7 @@ async function cargar(){
 async function accion(a, d){
   const r = await API.adminAccion(a, d);
   if(r.status !== 'success'){ toast(r.message || 'No se pudo completar'); return false; }
+  if(r.message) toast(r.message);   // por ejemplo, cuando se vuelve a dar de alta a alguien dado de baja
   await cargar(); return true;
 }
 

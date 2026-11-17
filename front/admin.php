@@ -81,6 +81,27 @@ try {
         foreach (['nombre', 'apellido', 'cedula', 'email', 'contrasena'] as $k)
             if (trim($in[$k] ?? '') === '') out(['status' => 'error', 'message' => 'Completá todos los campos'], 400);
         if (!filter_var($in['email'], FILTER_VALIDATE_EMAIL)) out(['status' => 'error', 'message' => 'Email inválido'], 400);
+
+        // Al dar de baja a alguien no se lo borra: queda como Inactivo (para no perder su historial).
+        // Por eso, si la cédula o el email pertenecen a una persona dada de baja, en vez de decir
+        // "ya existe" se la vuelve a dar de alta con los datos nuevos.
+        $s = $pdo->prepare("SELECT id, estado FROM user WHERE cedula = ? OR email = ?");
+        $s->execute([trim($in['cedula']), trim($in['email'])]);
+        $existentes = $s->fetchAll(PDO::FETCH_ASSOC);
+        if ($existentes) {
+            foreach ($existentes as $e)
+                if ($e['estado'] === 'Activo') out(['status' => 'error', 'message' => 'Esa cédula o email ya existe'], 409);
+            // La cédula es de una persona dada de baja y el email de otra: no se puede saber cuál reactivar
+            if (count($existentes) > 1) out(['status' => 'error', 'message' => 'Esa cédula y ese email pertenecen a dos personas dadas de baja distintas'], 409);
+            // Se reactiva como un alta nueva: datos y contraseña nuevos, sin plan, entrenador ni objetivo anteriores
+            $pdo->prepare("UPDATE user SET nombre = ?, apellido = ?, cedula = ?, rol = ?, email = ?, contrasena = ?, estado = 'Activo',
+                                          id_plan = NULL, id_entrenador = NULL, objetivo = NULL
+                           WHERE id = ?")
+                ->execute([trim($in['nombre']), trim($in['apellido']), trim($in['cedula']), $rol, trim($in['email']),
+                           password_hash($in['contrasena'], PASSWORD_DEFAULT), $existentes[0]['id']]);
+            out(['status' => 'success', 'message' => 'Se volvió a dar de alta a la persona']);
+        }
+
         try {
             $pdo->prepare("INSERT INTO user (nombre, apellido, cedula, rol, email, contrasena, estado) VALUES (?,?,?,?,?,?, 'Activo')")
                 ->execute([trim($in['nombre']), trim($in['apellido']), trim($in['cedula']), $rol, trim($in['email']), password_hash($in['contrasena'], PASSWORD_DEFAULT)]);

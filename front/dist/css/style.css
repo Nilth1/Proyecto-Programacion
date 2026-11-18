@@ -173,3 +173,15 @@
 .footer-link:hover {
     color: #0066ff !important;
 }
+
+/* Menú de arriba: con 6 opciones (se sumó GIMNASIO), en pantallas de 992 a 1199 px
+   se achica un poco el espacio entre opciones para que el botón "Únete Ahora" no se parta en dos líneas */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    header .navbar-nav {
+        gap: .25rem !important;
+    }
+}
+
+header .btn {
+    white-space: nowrap;
+}

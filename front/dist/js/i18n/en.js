@@ -14,7 +14,7 @@ window.I18N.en = {
     // ---------------- Navegación y generales ----------------
     'INICIO': 'HOME', 'SERVICIOS': 'SERVICES', 'ENTRENADORES': 'TRAINERS', 'PLANES': 'PLANS', 'CONTACTO': 'CONTACT',
     'Únete Ahora': 'Join Now', 'Volver': 'Back', 'Conectar': 'Log in', 'Cerrar': 'Close', 'Cancelar': 'Cancel',
-    'Guardar': 'Save', 'Listo': 'Done', 'Borrar': 'Delete', 'Ejercicio borrado': 'Exercise deleted', 'Rutina borrada': 'Routine deleted', 'Ese ejercicio ya no existe': 'That exercise no longer exists', 'Quitar': 'Remove', 'Modificar': 'Edit', 'Elegir': 'Choose',
+    'Guardar': 'Save', 'Listo': 'Done', 'Borrar': 'Delete', 'Usuarios de prueba': 'Test users', 'Tocá uno y se completan los datos solos': 'Tap one and the fields fill in automatically', 'Contraseña:': 'Password:', 'Ejercicio borrado': 'Exercise deleted', 'Rutina borrada': 'Routine deleted', 'Ese ejercicio ya no existe': 'That exercise no longer exists', 'Quitar': 'Remove', 'Modificar': 'Edit', 'Elegir': 'Choose',
     'Ver todos': 'See all', 'Ver todos >': 'See all >', 'Leer mas': 'Read more', 'Enviar': 'Send', 'Cargando...': 'Loading...',
     'Mi perfil': 'My profile', 'Cerrar sesión': 'Log out', 'EN LÍNEA': 'ONLINE', 'En línea': 'Online', 'Desconectado': 'Offline',
     'EN VIVO': 'LIVE', 'EN VIVO ·': 'LIVE ·', 'Pagar': 'Pay', 'Continuar con': 'Continue with', 'CrossFit & HIIT': 'CrossFit & HIIT','Hoy': 'Today', 'Mañana': 'Tomorrow', 'En': 'In', 'días': 'days', 'con': 'with', 'nos': 'us',

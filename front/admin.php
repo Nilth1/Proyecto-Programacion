@@ -68,12 +68,18 @@ try {
         }
         $deuda = $pdo->query("SELECT estado, SUM(monto) FROM cuotas WHERE estado IN ('Pendiente','Vencida') GROUP BY estado")->fetchAll(PDO::FETCH_KEY_PAIR);
 
+        // Quejas que escribieron los socios desde su portal (las más nuevas primero)
+        $quejas = $pdo->query("SELECT q.id, q.texto, q.fecha, u.nombre, u.apellido, u.email, u.estado
+                               FROM quejas q JOIN user u ON u.id = q.id_user
+                               ORDER BY q.fecha DESC, q.id DESC")->fetchAll(PDO::FETCH_ASSOC);
+
         out(['status' => 'success', 'data' => [
             'admin' => $admin->fetch(PDO::FETCH_ASSOC),
             'usuarios' => $personas('socio'),
             'entrenadores' => $personas('entrenador'),
             'rutinas' => $rutinas,
-            'fin' => ['meses' => $serie, 'pendiente' => (float)($deuda['Pendiente'] ?? 0), 'vencida' => (float)($deuda['Vencida'] ?? 0)]
+            'fin' => ['meses' => $serie, 'pendiente' => (float)($deuda['Pendiente'] ?? 0), 'vencida' => (float)($deuda['Vencida'] ?? 0)],
+            'quejas' => $quejas
         ]]);
 
     case 'crear_persona':
@@ -134,6 +140,11 @@ try {
         // Solo socios y entrenadores; se pasa a Inactivo (no se borra el historial)
         $s = $pdo->prepare("UPDATE user SET estado = 'Inactivo' WHERE id = ? AND LOWER(rol) IN ('socio','entrenador')");
         $s->execute([(int)($in['id'] ?? 0)]);
+        out(['status' => 'success']);
+
+    case 'borrar_queja':
+        // El administrador puede eliminar una queja (por ejemplo, cuando ya la resolvió)
+        $pdo->prepare("DELETE FROM quejas WHERE id = ?")->execute([(int)($in['id'] ?? 0)]);
         out(['status' => 'success']);
 
     case 'agregar_ejercicio':

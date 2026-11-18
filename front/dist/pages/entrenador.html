@@ -3,10 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <!-- Traducción (i18n): va primero para que fechas y textos salgan en el idioma elegido -->
-<script src="../js/i18n/en.js"></script>
-<script src="../js/i18n.js"></script>
+<script src="../js/i18n/en.js?v=3"></script>
+<script src="../js/i18n.js?v=2"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Entrenador - FitPower</title>
+<!-- Iconito de la pestaña del navegador -->
+<link rel="icon" type="image/x-icon" href="../assets/logos/favicon.ico">
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/logos/favicon-192.png">
+<link rel="apple-touch-icon" href="../assets/logos/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -205,7 +209,7 @@ document.addEventListener('click', async e => {
     const ok = await accion('crear_rutina', {nombre:nomRutina, items: slots.map(s=>({ejercicio_id:+s.id, series:+s.series, repeticiones:+s.reps}))}, 'Rutina creada');
     if(ok){ nomRutina=''; slots=[{id:'',series:3,reps:10}]; render(); } return;
   }
-  if(d.delr){ if(confirm('¿Borrar esta rutina? También se le quita a los socios que la tengan.')) accion('borrar_rutina', {id:+d.delr}); return; }
+  if(d.delr){ if(confirm('¿Borrar esta rutina? También se le quita a los socios que la tengan.')) accion('borrar_rutina', {id:+d.delr}, 'Rutina borrada'); return; }
   if(t.id==='adjGif') return $('#eGif').click();   // abre el selector de archivos
   if(t.id==='quitarGif'){ gifNuevo = null; return pintarGif(); }
   if(t.id==='guardarE'){
@@ -214,7 +218,13 @@ document.addEventListener('click', async e => {
     if(ok){ gifNuevo = null; render(); } else t.disabled = false;
     return;
   }
-  if(d.dele){ if(confirm('¿Borrar este ejercicio?')) accion('borrar_ejercicio', {id:+d.dele}); return; }
+  if(d.dele){
+    // Si el ejercicio está en rutinas, se avisa que también se va a sacar de ellas
+    const ej = D.ejercicios.find(x => x.id == d.dele), n = ej ? +ej.usado : 0;
+    const msj = n ? `¿Borrar este ejercicio? Está en ${n} ${n === 1 ? 'rutina' : 'rutinas'} y se va a sacar de ${n === 1 ? 'ella' : 'ellas'}.` : '¿Borrar este ejercicio?';
+    if(confirm(msj)) accion('borrar_ejercicio', {id:+d.dele}, 'Ejercicio borrado');
+    return;
+  }
 });
 // Cuando eligen un archivo en "Adjuntar GIF": se valida y se lee como texto (base64) para mandarlo en el JSON
 document.addEventListener('change', e => {

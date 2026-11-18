@@ -90,3 +90,21 @@
     background-color: rgba(255, 255, 255, 0.2);
     color: #ffffff;
 }
+
+/* ---------- resumen de los 3 planes (mismo diseño que la landing) ---------- */
+.fw-black {
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.tracking-wider {
+    letter-spacing: 1px;
+}
+
+.bg-dark-card {
+    background-color: #0f0f0f;
+}
+
+.pricing-card {
+    transition: transform 0.3s ease;
+}

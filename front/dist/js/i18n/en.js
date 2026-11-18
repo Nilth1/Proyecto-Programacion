@@ -14,7 +14,7 @@ window.I18N.en = {
     // ---------------- Navegación y generales ----------------
     'INICIO': 'HOME', 'SERVICIOS': 'SERVICES', 'ENTRENADORES': 'TRAINERS', 'PLANES': 'PLANS', 'CONTACTO': 'CONTACT',
     'Únete Ahora': 'Join Now', 'Volver': 'Back', 'Conectar': 'Log in', 'Cerrar': 'Close', 'Cancelar': 'Cancel',
-    'Guardar': 'Save', 'Listo': 'Done', 'Borrar': 'Delete', 'Quitar': 'Remove', 'Modificar': 'Edit', 'Elegir': 'Choose',
+    'Guardar': 'Save', 'Listo': 'Done', 'Borrar': 'Delete', 'Ejercicio borrado': 'Exercise deleted', 'Rutina borrada': 'Routine deleted', 'Ese ejercicio ya no existe': 'That exercise no longer exists', 'Quitar': 'Remove', 'Modificar': 'Edit', 'Elegir': 'Choose',
     'Ver todos': 'See all', 'Ver todos >': 'See all >', 'Leer mas': 'Read more', 'Enviar': 'Send', 'Cargando...': 'Loading...',
     'Mi perfil': 'My profile', 'Cerrar sesión': 'Log out', 'EN LÍNEA': 'ONLINE', 'En línea': 'Online', 'Desconectado': 'Offline',
     'EN VIVO': 'LIVE', 'EN VIVO ·': 'LIVE ·', 'Pagar': 'Pay', 'Continuar con': 'Continue with', 'CrossFit & HIIT': 'CrossFit & HIIT','Hoy': 'Today', 'Mañana': 'Tomorrow', 'En': 'In', 'días': 'days', 'con': 'with', 'nos': 'us',
@@ -98,7 +98,9 @@ window.I18N.en = {
     'Entrenador elegido': 'Trainer selected',
     'Quejas': 'Complaints', 'Un espacio para desahogarte. Solo vos podés ver lo que escribas acá.': 'A place to vent. Only you can see what you write here.',
     'Escribí lo que quieras...': 'Write whatever you want...', 'Todavía no escribiste nada.': "You haven't written anything yet.", 'Guardado': 'Saved',
-    'Escribí algo primero': 'Write something first', '¿Borrar esta queja?': 'Delete this complaint?',
+    'Escribí algo primero': 'Write something first', '¿Borrar esta queja?': 'Delete this complaint?', '¿Eliminar esta queja?': 'Delete this complaint?',
+    'Comentarios que dejaron los socios desde su portal': 'Comments members left from their portal', 'Todavía no hay quejas.': 'There are no complaints yet.',
+    'Dado de baja': 'Removed', 'Eliminar': 'Delete',
     'Error al cargar datos': 'Error loading data', 'No se pudo completar': 'Could not be completed',
 
     // ---------------- Pagos ----------------
@@ -174,7 +176,7 @@ window.I18N.en = {
     'Objetivo inválido': 'Invalid goal', 'Entrenador no disponible': 'Trainer not available', 'Ese entrenador no tiene cupos': 'That trainer has no openings',
     'Acción desconocida': 'Unknown action', 'Error en la base de datos': 'Database error', 'El archivo tiene que ser un GIF': 'The file must be a GIF',
     'El GIF llegó roto, probá de nuevo': 'The GIF arrived corrupted, please try again', 'Ese archivo no es un GIF válido': 'That file is not a valid GIF',
-    'No se pudo crear la carpeta de GIFs en el servidor': 'The GIF folder could not be created on the server', 'No se pudo guardar el GIF en el servidor': 'The GIF could not be saved on the server',
+    'No se pudo crear la carpeta de GIFs en el servidor': 'The GIF folder could not be created on the server', 'No se pudo guardar el GIF en el servidor': 'The GIF could not be saved on the server', 'El servidor no tiene permiso para guardar GIFs': 'The server does not have permission to save GIFs',
     'Completá nombre, grupo, tipo y dificultad': 'Fill in name, group, type and difficulty', 'Ese ejercicio está en una rutina. Borrá la rutina primero': 'That exercise is in a routine. Delete the routine first',
     'Ponele un nombre a la rutina': 'Give the routine a name', 'Agregá al menos un ejercicio': 'Add at least one exercise',
     'Elegí ejercicio, series y repeticiones en cada slot': 'Choose an exercise, sets and reps in every slot', 'Repetiste un ejercicio en la rutina': 'You repeated an exercise in the routine',
@@ -233,6 +235,8 @@ window.I18N.en = {
     [/^Actualizado hace (.+)$/, 'Updated $1 ago'],
     [/^Si no adjuntás uno, se busca un GIF automático por el nombre\. Máximo (\d+) MB\.$/, "If you don't attach one, a GIF is found automatically by name. Max $1 MB."],
     [/^El GIF pesa más de (\d+) MB$/, 'The GIF is larger than $1 MB'],
+    [/^¿Borrar este ejercicio\? Está en 1 rutina y se va a sacar de ella\.$/, 'Delete this exercise? It is in 1 routine and will be removed from it.'],
+    [/^¿Borrar este ejercicio\? Está en (\d+) rutinas y se va a sacar de ellas\.$/, 'Delete this exercise? It is in $1 routines and will be removed from them.'],
     [/^de (\d+) socios$/, 'of $1 members'],
     [/^de (\d+) en total$/, 'of $1 in total'],
     [/^(\d+) socios al día$/, '$1 members up to date'],

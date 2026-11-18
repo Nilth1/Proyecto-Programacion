@@ -38,6 +38,9 @@ function guardarGif($dataUrl) {
         out(['status' => 'error', 'message' => 'Ese archivo no es un GIF válido'], 400);
     if (!is_dir(GIF_CARPETA) && !@mkdir(GIF_CARPETA, 0777, true))
         out(['status' => 'error', 'message' => 'No se pudo crear la carpeta de GIFs en el servidor'], 500);
+    // La carpeta existe pero Apache (usuario www-data) no puede escribir en ella: es un tema de permisos del servidor
+    if (!is_writable(GIF_CARPETA))
+        out(['status' => 'error', 'message' => 'El servidor no tiene permiso para guardar GIFs'], 500);
     $nombre = 'ej_' . bin2hex(random_bytes(8)) . '.gif';   // nombre al azar: no se pisan ni se pueden adivinar
     if (@file_put_contents(GIF_CARPETA . '/' . $nombre, $bin) === false)
         out(['status' => 'error', 'message' => 'No se pudo guardar el GIF en el servidor'], 500);
@@ -102,11 +105,15 @@ try {
 
     case 'borrar_ejercicio':
         $id = (int)($in['id'] ?? 0);
-        $s = $pdo->prepare("SELECT COUNT(*) FROM rutina_ejercicio WHERE id_ejercicio = ?"); $s->execute([$id]);
-        if ($s->fetchColumn() > 0) out(['status' => 'error', 'message' => 'Ese ejercicio está en una rutina. Borrá la rutina primero'], 409);
         $s = $pdo->prepare("SELECT media_ejercicio FROM ejercicios WHERE id = ?"); $s->execute([$id]);
-        $gif = $s->fetchColumn();
+        $gif = $s->fetchColumn();   // false = no existe ese ejercicio; null = existe pero sin GIF propio
+        if ($gif === false) out(['status' => 'error', 'message' => 'Ese ejercicio ya no existe'], 404);
+        // Si el ejercicio está en alguna rutina, primero se saca de esas rutinas y después se borra.
+        // Va en una transacción: o se hacen los dos pasos, o no se hace ninguno.
+        $pdo->beginTransaction();
+        $pdo->prepare("DELETE FROM rutina_ejercicio WHERE id_ejercicio = ?")->execute([$id]);
         $pdo->prepare("DELETE FROM ejercicios WHERE id = ?")->execute([$id]);
+        $pdo->commit();
         borrarGif($gif);
         out(['status' => 'success']);
 

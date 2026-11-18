@@ -3,10 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <!-- Traducción (i18n): va primero para que fechas y textos salgan en el idioma elegido -->
-<script src="../js/i18n/en.js"></script>
-<script src="../js/i18n.js"></script>
+<script src="../js/i18n/en.js?v=3"></script>
+<script src="../js/i18n.js?v=2"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Administrador - FitPower</title>
+<!-- Iconito de la pestaña del navegador -->
+<link rel="icon" type="image/x-icon" href="../assets/logos/favicon.ico">
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/logos/favicon-192.png">
+<link rel="apple-touch-icon" href="../assets/logos/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -57,6 +61,10 @@ tr.baja td{opacity:.45}
 .lista button{display:block;width:100%;text-align:left;background:none;border:1px solid transparent;color:#ccc;padding:12px 14px;border-radius:10px;cursor:pointer;font-weight:600;margin-bottom:4px}
 .lista button.on{background:var(--azul-s);border-color:rgba(47,107,255,.35);color:var(--azul)}
 .ej{display:flex;align-items:center;gap:14px;padding:12px 4px;border-top:1px solid var(--borde)}.ej:first-of-type{border-top:0}
+/* quejas */
+.queja{display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:start;padding:16px 4px;border-top:1px solid var(--borde)}.queja:first-child{border-top:0}
+.q-cab small{display:block;color:var(--gris);font-size:11px;margin-top:3px}.q-cab .tag{margin-left:8px;padding:3px 9px;font-size:10px}
+.queja p{grid-column:1/-1;margin:0;white-space:pre-wrap;color:#ddd;font-size:14px;line-height:1.5}
 .ej .n{width:28px;height:28px;border-radius:8px;background:var(--azul-s);color:var(--azul);display:grid;place-items:center;font-weight:800;font-size:12px}.ej div{flex:1}.ej small{color:var(--gris)}
 .barras{display:flex;align-items:flex-end;gap:14px;height:170px;margin-top:16px}
 .barras div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;font-size:11px;color:var(--gris)}
@@ -93,7 +101,7 @@ tr.baja td{opacity:.45}
 <script src="../js/gifs.js"></script>
 <script>
 /* ============ ESTADO (viene de la base de datos vía admin.php) ============ */
-let usuarios = [], entrenadores = [], rutinas = [], fin = {meses:[],pendiente:0,vencida:0};
+let usuarios = [], entrenadores = [], rutinas = [], quejas = [], fin = {meses:[],pendiente:0,vencida:0};
 let ADMIN = {nombre:'Admin',apellido:''}, tab = 'resumen', rutinaSel = null, cargado = false;
 
 /* ============ HELPERS ============ */
@@ -105,6 +113,7 @@ const ETQ = {paga:'Paga',retrasada:'Retrasada',nopaga:'No paga',sinc:'Sin cuota'
 const estado = u => ESTADO[u.cuota] || 'sinc';
 const tag = e => `<span class="tag ${e==='sinc'?'t-baja':'t-'+e}"><i></i>${ETQ[e]}</span>`;
 const $$ = n => '$' + Number(n||0).toLocaleString('es');
+const fecha = f => new Date(String(f).replace(' ', 'T')).toLocaleString('es', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2800)}
 
 /* ============ API ============ */
@@ -113,6 +122,7 @@ async function cargar(){
   if(r.code === 'no_auth'){ window.location.href = 'login.html'; return; }
   if(r.status !== 'success'){ toast(r.message || 'Error al cargar datos'); return; }
   ({usuarios, entrenadores, rutinas, fin} = r.data);
+  quejas = r.data.quejas || [];
   ADMIN = r.data.admin || ADMIN;
   if(!rutinas.some(x => x.id == rutinaSel)) rutinaSel = rutinas[0]?.id ?? null;
   cargado = true; pintarPerfil(); render();
@@ -185,11 +195,18 @@ const vistas = {
       <div class="card kpi"><small>Vencidas</small><strong style="color:var(--rojo)">${$$(fin.vencida)}</strong><span>cuotas sin pagar a tiempo</span></div></div>
     <div class="card"><small style="font-size:10px;letter-spacing:1px;color:var(--gris);font-weight:600">INGRESOS ÚLTIMOS 6 MESES</small>
       <div class="barras">${s.map(x=>`<div>${$$(x.v)}<i style="height:${x.v/max*78}%"></i>${x.m}</div>`).join('')}</div></div>`;
+  },
+  quejas(){
+    return `<h2>Quejas</h2><p class="sub">Comentarios que dejaron los socios desde su portal</p>
+    <div class="card">${quejas.length ? quejas.map(q=>`<div class="queja">
+      <div class="q-cab"><strong>${esc(q.nombre)} ${esc(q.apellido)}</strong>${q.estado!=='Activo'?' <span class="tag t-baja"><i></i>Dado de baja</span>':''}<small>${esc(q.email)} · ${fecha(q.fecha)}</small></div>
+      <button class="btn x" data-delq="${q.id}">Eliminar</button>
+      <p>${esc(q.texto)}</p></div>`).join('') : vacio('Todavía no hay quejas.')}</div>`;
   }
 };
 
 /* ============ RENDER + EVENTOS ============ */
-const TABS = [['resumen','Resumen'],['usuarios','Usuarios'],['entrenadores','Entrenadores'],['rutinas','Rutinas'],['finanzas','Finanzas']];
+const TABS = [['resumen','Resumen'],['usuarios','Usuarios'],['entrenadores','Entrenadores'],['rutinas','Rutinas'],['finanzas','Finanzas'],['quejas','Quejas']];
 function render(){
   $('#nav').innerHTML = TABS.map(([k,n])=>`<button class="${k===tab?'on':''}" data-t="${k}">${n}</button>`).join('');
   $('#vista').innerHTML = cargado ? vistas[tab]() : vacio('Cargando...');
@@ -213,6 +230,7 @@ document.addEventListener('click', e => {
   if(d.del){ if(confirm('¿Quitar este usuario?')) accion('quitar_persona', {id:+d.del}); return; }
   if(d.delE){ if(confirm('¿Quitar este entrenador?')) accion('quitar_persona', {id:+d.delE}); return; }
   if(d.delEj){ accion('quitar_ejercicio', {rutina_id:rutinaSel, ejercicio_id:+d.delEj}); return; }
+  if(d.delq){ if(confirm('¿Eliminar esta queja?')) accion('borrar_queja', {id:+d.delq}); return; }
   if(d.edit) return editarPersona(usuarios.find(x=>x.id==d.edit), 'Modificar usuario');
   if(d.edite) return editarPersona(entrenadores.find(x=>x.id==d.edite), 'Modificar entrenador');
   if(t.id==='addU') return pedirPersona('Socio','Nuevo usuario');

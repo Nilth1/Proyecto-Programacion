@@ -177,7 +177,7 @@ const vistas = {
     <div class="card tabla">${entrenadores.length ? `<table><thead><tr><th>Nombre</th><th>Email</th><th>Estado</th><th></th></tr></thead><tbody>${
       entrenadores.map(e=>`<tr><td>${esc(e.nombre)} ${esc(e.apellido)}</td><td>${esc(e.email)}</td>
       <td><span class="on-dot ${e.online?'si':''}"></span>${e.online?'En línea':'Desconectado'}</td>
-      <td style="text-align:right"><button class="btn x e" data-edite="${e.id}">Modificar</button><button class="btn x" data-delE="${e.id}">Quitar</button></td></tr>`).join('')}</tbody></table>` : vacio('No hay entrenadores activos.')}</div>`;
+      <td style="text-align:right"><button class="btn x e" data-edite="${e.id}">Modificar</button><button class="btn x" data-del-e="${e.id}">Quitar</button></td></tr>`).join('')}</tbody></table>` : vacio('No hay entrenadores activos.')}</div>`;
   },
   rutinas(){
     const r = rutinas.find(x=>x.id==rutinaSel);
@@ -185,7 +185,7 @@ const vistas = {
     return `<h2>Rutinas</h2><p class="sub">Gestioná los ejercicios de cada rutina</p>
     <div class="dosc"><div class="card lista">${rutinas.map(x=>`<button class="${x.id==r.id?'on':''}" data-r="${x.id}">${esc(x.nombre)}</button>`).join('')}</div>
     <div class="card"><div class="barra"><strong style="font-size:16px">${esc(r.nombre)}</strong><button class="btn" id="addEj">+ Agregar ejercicio</button></div>
-      ${r.ej.length ? r.ej.map((x,i)=>`<div class="ej" data-gif="${esc(x.n)}" data-gif-src="${esc(x.g||'')}"><span class="n">${i+1}</span><div>${esc(x.n)}<span class="gif-ico">▶</span><br><small>${esc(x.s)}</small></div><button class="btn x" data-delEj="${x.id}">Eliminar</button></div>`).join('') : '<p class="sub">Sin ejercicios todavía.</p>'}</div></div>`;
+      ${r.ej.length ? r.ej.map((x,i)=>`<div class="ej" data-gif="${esc(x.n)}" data-gif-src="${esc(x.g||'')}"><span class="n">${i+1}</span><div>${esc(x.n)}<span class="gif-ico">▶</span><br><small>${esc(x.s)}</small></div><button class="btn x" data-del-ej="${x.id}">Eliminar</button></div>`).join('') : '<p class="sub">Sin ejercicios todavía.</p>'}</div></div>`;
   },
   finanzas(){
     const s = fin.meses, max = Math.max(...s.map(x=>x.v),1), actual = s.length ? s[s.length-1].v : 0;
